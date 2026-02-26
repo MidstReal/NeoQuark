@@ -89,6 +89,9 @@ void chkcom() {
             outtextendl(command2 + ":");
         } 
         else if (command == "end") outtextendl("ret");
+        else if (command == ";") {}
+        else if (command == "$share") outtextendl("global " + arg[0]);
+        else if (command == "$include") outtextendl("%include " + arg[0]);
         else if (command == "argvars") {
             for (int i = 0; i < maxargsB; i++) outtextendl("CBarg" + to_string(i) + " db 0");
             for (int i = 0; i < maxargsW; i++) outtextendl("CWarg" + to_string(i) + " dw 0");
