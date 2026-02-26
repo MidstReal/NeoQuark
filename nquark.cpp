@@ -75,16 +75,20 @@ void chkcom() {
     if (!command.empty()) {
         if (command == "func") {
             int b = 0, w = 0, dw = 0, qw = 0;
-            for (auto& s : arg) {
-                if (s == "1b") b++; else if (s == "2b") w++;
-                else if (s == "4b") dw++; else if (s == "8b") qw++;
+            for (auto& carg : arg) {
+                if (carg == "1b") b++; 
+                else if (carg == "2b") w++;
+                else if (carg == "4b") dw++; 
+                else if (carg == "8b") qw++;
             }
-            if (b > maxargsB) maxargsB = b; if (w > maxargsW) maxargsW = w;
-            if (dw > maxargsDW) maxargsDW = dw; if (qw > maxargsQW) maxargsQW = qw;
+            if (b > maxargsB) maxargsB = b; 
+            if (w > maxargsW) maxargsW = w;
+            if (dw > maxargsDW) maxargsDW = dw; 
+            if (qw > maxargsQW) maxargsQW = qw;
 
             outtextendl(command2 + ":");
         } 
-        else if (command == "end") { outtextendl("ret"); }
+        else if (command == "end") outtextendl("ret");
         else if (command == "argvars") {
             for (int i = 0; i < maxargsB; i++) outtextendl("CBarg" + to_string(i) + " db 0");
             for (int i = 0; i < maxargsW; i++) outtextendl("CWarg" + to_string(i) + " dw 0");
@@ -95,20 +99,32 @@ void chkcom() {
     }
 
     if (!func.empty() && cmf) {
-        int divider = -1;
-        for (int i = 0; i < arg.size(); i++) if (arg[i] == "ARGS") { divider = i; break; }
+        int div = -1;
+        for (int i = 0; i < arg.size(); i++) if (arg[i] == "ARGS") { div = i; break; }
 
-        if (divider != -1) {
+        if (div != -1) {
             int b = 0, w = 0, dw = 0, qw = 0;
-            for (int i = divider + 1; i < arg.size(); i++) {
-                int t_idx = i - (divider + 1);
-                if (t_idx < divider) {
-                    string type = arg[t_idx];
+            for (int i = div + 1; i < arg.size(); i++) {
+                int tpos = i - (div + 1);
+                if (tpos < div) {
+                    string type = arg[tpos];
                     string val = arg[i];
-                    if (type == "1b") mov("byte [CBarg" + to_string(b++) + "]", val);
-                    else if (type == "2b") mov("word [CWarg" + to_string(w++) + "]", val);
-                    else if (type == "4b") mov("dword [CDWarg" + to_string(dw++) + "]", val);
-                    else if (type == "8b") mov("qword [CQWarg" + to_string(qw++) + "]", val);
+                    char vt1 = type[0];
+                    char vt3 = type[2];
+                    string final = "";
+
+                    if(vt1 == '1') final+="[CBarg" + to_string(b++) + "]";
+                    else if(vt1 == '2') final+="[CWarg" + to_string(w++) + "]";
+                    else if(vt1 == '4') final+="[CDWarg" + to_string(dw++) + "]";
+                    else if(vt1 == '8') final+="[CQWarg" + to_string(qw++) + "]";
+                    else if(vt1 == '$') {
+                        final+=type.substr(1, 3);
+                    }
+                    if (vt3 == '1') mov("byte " + final, val);
+                    else if (vt3== '2') mov("word " + final, val);
+                    else if (vt3 == '4') mov("dword " + final, val);
+                    else if (vt3 == '8') mov("qword " + final, val);
+                    else mov(final, val);
                 }
             }
         }
