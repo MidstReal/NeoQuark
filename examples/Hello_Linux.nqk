@@ -1,10 +1,11 @@
-`global _start`
-
-`%include "libs/linux.asm"`
+$share(_start)
+$include("libs/win.asm")
 
 `section .text`
 
 func _start()
+    ; print($rsi, $rdx, ARGS, var, line_length)
+
     print($rsi, $rdx, ARGS, msg, 23)
     exit()
 
