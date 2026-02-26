@@ -6,13 +6,25 @@ compiler:
 g++ nquark.cpp -o nquark
 ./nquark input.nqk -o output.asm
 ```
-programm for linux:
+program for linux:
 ```
+./nquark input.nqk -o output.asm
+
 nasm -f elf64 output.asm -o prog.o
 ld prog.o -o prog
+
 ./prog
 ```
-programm bin for own os:
+program for windows:
+```
+./nquark.exe input.nqk -o output.asm
+
+nasm -f win64 output.asm -o prog.o
+ld prog.o -o prog.exe
+
+./prog.exe
+```
+program bin for own os:
 ```
 nasm -f bin output.asm -o boot.bin
 qemu-system-x86_64 boot.bin
