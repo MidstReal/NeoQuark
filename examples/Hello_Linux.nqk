@@ -1,0 +1,12 @@
+`global _start`
+
+`%include "libs/linux.asm"`
+
+`section .text`
+
+func _start()
+    print($rsi, $rdx, ARGS, msg, 23)
+    exit()
+
+`section .data`
+`msg db "Hello, Linux!", 10`
