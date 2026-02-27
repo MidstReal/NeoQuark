@@ -32,9 +32,10 @@ void chkcom() {
     if (first == string::npos) return;
     line = line.substr(first);
 
-    string command = "", command2 = "", func = "", asmstr = "";
+    string command = "", command2 = "", command3 = "", func = "", asmstr = "";
     vector<string> arg;
-    bool inbkt = false, inqt = false, inasm = false, cmdp = true;
+    bool inbkt = false, inqt = false, inasm = false;
+    int cmdp = 1;
     int curarg = 0;
 
     for (int i = 0; i < line.length(); i++) {
@@ -53,16 +54,17 @@ void chkcom() {
             arg[curarg] += line[i];
             continue;
         }
-        if (line[i] == '(') { inbkt = true; cmdp = false; continue; }
+        if (line[i] == '(') { inbkt = true; cmdp = 0; continue; }
         if (line[i] == ')') { inbkt = false; continue; }
         if (line[i] == ',') { curarg++; continue; }
         if (line[i] == ' ' || line[i] == '\t') {
-            if (!inbkt && !command.empty()) cmdp = false;
+            if (!inqt && !inbkt) cmdp++;
             continue;
         }
         if (!inbkt) {
-            if (cmdp) { command += line[i]; func += line[i]; }
-            else command2 += line[i]; 
+            if (cmdp == 1) { command += line[i]; func += line[i]; }
+            else if(cmdp == 2) command2 += line[i]; 
+            else if(cmdp == 3) command3 += line[i]; 
         } else {
             if (curarg >= arg.size()) arg.push_back("");
             arg[curarg] += line[i];
@@ -74,19 +76,33 @@ void chkcom() {
     bool cmf = false;
     if (!command.empty()) {
         if (command == "func") {
-            int b = 0, w = 0, dw = 0, qw = 0;
-            for (auto& carg : arg) {
-                if (carg == "1b") b++; 
-                else if (carg == "2b") w++;
-                else if (carg == "4b") dw++; 
-                else if (carg == "8b") qw++;
-            }
-            if (b > maxargsB) maxargsB = b; 
-            if (w > maxargsW) maxargsW = w;
-            if (dw > maxargsDW) maxargsDW = dw; 
-            if (qw > maxargsQW) maxargsQW = qw;
-
             outtextendl(command2 + ":");
+
+            int div = -1;
+            for (int i = 0; i < arg.size(); i++) if (arg[i] == "|") { div = i; break; }
+
+            if (div != -1) {
+                int b = 0, w = 0, dw = 0, qw = 0;
+                for (int i = div + 1; i < arg.size(); i++) {
+                    int tpos = i - (div + 1);
+                    if (tpos < div) {
+                        string type = arg[tpos];
+                        string val = arg[i];
+                        char vt1 = type[0];
+                        string final = "";
+                        bool reg = false;
+
+                        final+=type.substr(1, type.length()-1);
+
+                        if (vt1 == 'B') mov("byte " + final, val);
+                        else if (vt1== 'W') mov("word " + final, val);
+                        else if (vt1 == 'D') mov("dword " + final, val);
+                        else if (vt1 == 'Q') mov("qword " + final, val);
+                        else if (vt1 == '$') mov(final, val);
+                    }
+                }
+            }
+            
         } 
         else if (command == "if"){
             string type;
@@ -116,18 +132,21 @@ void chkcom() {
         else if (command == "$share") outtextendl("global " + arg[0]);
         else if (command == "$include") outtextendl("%include " + arg[0]);
         else if (command == "goto") outtextendl("jmp " + arg[0]);
-        else if (command == "argvars") {
-            for (int i = 0; i < maxargsB; i++) outtextendl("CBarg" + to_string(i) + " db 0");
-            for (int i = 0; i < maxargsW; i++) outtextendl("CWarg" + to_string(i) + " dw 0");
-            for (int i = 0; i < maxargsDW; i++) outtextendl("CDWarg" + to_string(i) + " dd 0");
-            for (int i = 0; i < maxargsQW; i++) outtextendl("CQWarg" + to_string(i) + " dq 0");
-        } 
+        else if (command == "int") outtextendl("int " + arg[0]);
+
+        else if (command2 == "=") mov(command, command3);
+        else if (command2 == "+=") outtextendl("add " + command + ", " + command3);
+        else if (command2 == "-=") outtextendl("sub " + command + ", " + command3);
+        else if (command2 == "1=") outtextendl(command + " db " + arg[0]);
+        else if (command2 == "2=") outtextendl(command + " dw " + arg[0]);
+        else if (command2 == "4=") outtextendl(command + " dd " + arg[0]);
+        else if (command2 == "8=") outtextendl(command + " dq " + arg[0]);
         else cmf = true;
     }
 
     if (!func.empty() && cmf) {
         int div = -1;
-        for (int i = 0; i < arg.size(); i++) if (arg[i] == "ARGS") { div = i; break; }
+        for (int i = 0; i < arg.size(); i++) if (arg[i] == "|") { div = i; break; }
 
         if (div != -1) {
             int b = 0, w = 0, dw = 0, qw = 0;
@@ -137,25 +156,16 @@ void chkcom() {
                     string type = arg[tpos];
                     string val = arg[i];
                     char vt1 = type[0];
-                    char vt3 = type[2];
                     string final = "";
                     bool reg = false;
 
-                    if(vt1 == '1') final+="[CBarg" + to_string(b++) + "]";
-                    else if(vt1 == '2') final+="[CWarg" + to_string(w++) + "]";
-                    else if(vt1 == '4') final+="[CDWarg" + to_string(dw++) + "]";
-                    else if(vt1 == '8') final+="[CQWarg" + to_string(qw++) + "]";
-                    else if(vt1 == '$') {
-                        final+=type.substr(1, type.length()-1);
-                        reg = true;
-                    }
-                    if(!reg){
-                        if (vt3 == '1') mov("byte " + final, val);
-                        else if (vt3== '2') mov("word " + final, val);
-                        else if (vt3 == '4') mov("dword " + final, val);
-                        else if (vt3 == '8') mov("qword " + final, val);
-                    }
-                    else mov(final, val);
+                    final+=type.substr(1, type.length()-1);
+
+                    if (vt1 == 'B') mov("byte " + final, val);
+                    else if (vt1== 'W') mov("word " + final, val);
+                    else if (vt1 == 'D') mov("dword " + final, val);
+                    else if (vt1 == 'Q') mov("qword " + final, val);
+                    else if (vt1 == '$') mov(final, val);
                 }
             }
         }
