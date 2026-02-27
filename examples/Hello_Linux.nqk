@@ -6,7 +6,7 @@ $include("libs/linux.asm")
 func _start()
     ; print($rsi, $rdx, |, var, line_length)
 
-    print($rsi, $rdx, |, msg, 23)
+    print($rsi, $rdx, |, msg, 13)
     exit
 
 `section .data`
