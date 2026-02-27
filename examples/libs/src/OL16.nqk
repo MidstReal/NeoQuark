@@ -1,4 +1,5 @@
 $share(printch)
+$share(printstr)
 $share(readch)
 $share(cls)
 $share(exit)
@@ -6,6 +7,16 @@ $share(exit)
 func printch()
     `mov ah, 0x0e`
     `int 0x10`
+end
+
+func printstr()
+    `lodsb`
+    `or al, al`
+    `jz .done`
+    `mov ah, 0x0e`
+    `int 0x10`
+    `jmp printstr`
+func .done
 end
 
 func cls()
@@ -21,3 +32,4 @@ end
 func exit()
     `jmp $`
 end
+
