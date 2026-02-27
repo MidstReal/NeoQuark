@@ -88,10 +88,34 @@ void chkcom() {
 
             outtextendl(command2 + ":");
         } 
+        else if (command == "if"){
+            string type;
+
+            if (arg[4] == "BYTE"){
+                type = "byte ";
+            } else if(arg[4] == "WORD"){
+                type = "word ";
+            } else if(arg[4] == "DWORD"){
+                type = "dword ";
+            } else if(arg[4] == "QWORD"){
+                type = "qword ";
+            }
+
+            outtextendl("cmp "+ type + arg[0] + ", " + arg[2]);
+
+
+            if (arg[1] == "!=") out << "jne " << arg[3] << endl;
+            else if (arg[1] == "==") out << "je " << arg[3] << endl;
+            else if (arg[1] == "<=")  out << "jbe " << arg[3] << endl;
+            else if (arg[1] == ">=")  out << "jae " << arg[3] << endl;
+            else if (arg[1] == "<")  out << "jb " << arg[3] << endl;
+            else if (arg[1] == ">")  out << "ja " << arg[3] << endl;
+        }
         else if (command == "end") outtextendl("ret");
         else if (command == ";") {}
         else if (command == "$share") outtextendl("global " + arg[0]);
         else if (command == "$include") outtextendl("%include " + arg[0]);
+        else if (command == "goto") outtextendl("jmp " + arg[0]);
         else if (command == "argvars") {
             for (int i = 0; i < maxargsB; i++) outtextendl("CBarg" + to_string(i) + " db 0");
             for (int i = 0; i < maxargsW; i++) outtextendl("CWarg" + to_string(i) + " dw 0");
@@ -115,18 +139,22 @@ void chkcom() {
                     char vt1 = type[0];
                     char vt3 = type[2];
                     string final = "";
+                    bool reg = false;
 
                     if(vt1 == '1') final+="[CBarg" + to_string(b++) + "]";
                     else if(vt1 == '2') final+="[CWarg" + to_string(w++) + "]";
                     else if(vt1 == '4') final+="[CDWarg" + to_string(dw++) + "]";
                     else if(vt1 == '8') final+="[CQWarg" + to_string(qw++) + "]";
                     else if(vt1 == '$') {
-                        final+=type.substr(1, 3);
+                        final+=type.substr(1, type.length()-1);
+                        reg = true;
                     }
-                    if (vt3 == '1') mov("byte " + final, val);
-                    else if (vt3== '2') mov("word " + final, val);
-                    else if (vt3 == '4') mov("dword " + final, val);
-                    else if (vt3 == '8') mov("qword " + final, val);
+                    if(!reg){
+                        if (vt3 == '1') mov("byte " + final, val);
+                        else if (vt3== '2') mov("word " + final, val);
+                        else if (vt3 == '4') mov("dword " + final, val);
+                        else if (vt3 == '8') mov("qword " + final, val);
+                    }
                     else mov(final, val);
                 }
             }
