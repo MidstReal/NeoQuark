@@ -4,11 +4,12 @@ goto(_start)
 
 $include("libs/OL16.asm")
 
-func _start()
-    cls()
-    printstr($si, ARGS, msg)
+func _start
+    cls
+    printstr($si, |, msg)
+    exit
 
-`msg db "Hello, BIOS!"`
+msg 1= ("Hello, BIOS!")
 
 `times 510-($-$$) db 0`
 `dw 0xaa55`
