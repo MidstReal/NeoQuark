@@ -5,6 +5,40 @@ $share(cls)
 $share(exit)
 
 func printch()
+    ah = 0x0e
+    int(0x10)
+end
+
+func printstr()
+    `lodsb`
+    `or al, al`
+    `jz .done`
+    ah = 0x0e
+    int(0x10)
+    goto(printstr)
+func .done
+end
+
+func cls()
+    ax = 0x0003
+    int(0x10)
+end
+
+func readch()
+    ah = 0x00
+    int(0x16)
+end
+
+func exit()
+    goto($)
+end
+$share(printch)
+$share(printstr)
+$share(readch)
+$share(cls)
+$share(exit)
+
+func printch()
     `mov ah, 0x0e`
     `int 0x10`
 end
