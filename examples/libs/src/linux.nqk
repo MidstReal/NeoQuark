@@ -2,12 +2,11 @@ $share(print)
 $share(exit)
 
 func print()
-    `mov rax, 1`
-    `mov rdi, 1`
+    rax = 1
     `syscall`
 end
 
 func exit()
-    `mov rax, 60`
+    rax = 60
     `syscall`
 end
