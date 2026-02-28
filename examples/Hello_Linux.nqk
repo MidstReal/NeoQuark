@@ -10,4 +10,4 @@ func _start()
     exit
 
 `section .data`
-msg 1= ("Hello, Linux!")
+msg 1= "Hello, Linux!"
