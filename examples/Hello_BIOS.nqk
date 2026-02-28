@@ -9,7 +9,7 @@ func _start
     printstr($si, |, msg)
     exit
 
-msg 1= ("Hello, BIOS!")
+msg 1= "Hello, BIOS!",0x0a,0x0d
 
 `times 510-($-$$) db 0`
 `dw 0xaa55`
