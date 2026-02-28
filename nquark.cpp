@@ -107,15 +107,18 @@ void chkcom() {
         else if (command == "if"){
             string type;
 
-            if (arg[4] == "BYTE"){
-                type = "byte ";
-            } else if(arg[4] == "WORD"){
-                type = "word ";
-            } else if(arg[4] == "DWORD"){
-                type = "dword ";
-            } else if(arg[4] == "QWORD"){
-                type = "qword ";
+            if (arg.size() >= 5){
+                if (arg[4] == "BYTE"){
+                    type = "byte ";
+                } else if(arg[4] == "WORD"){
+                    type = "word ";
+                } else if(arg[4] == "DWORD"){
+                    type = "dword ";
+                } else if(arg[4] == "QWORD"){
+                    type = "qword ";
+                }
             }
+
 
             outtextendl("cmp "+ type + arg[0] + ", " + arg[2]);
 
@@ -127,20 +130,32 @@ void chkcom() {
             else if (arg[1] == "<")  out << "jb " << arg[3] << endl;
             else if (arg[1] == ">")  out << "ja " << arg[3] << endl;
         }
+        else if (command[command.length()-1] == ':') outtextendl(command);
         else if (command == "end") outtextendl("ret");
         else if (command == ";") {}
         else if (command == "$share") outtextendl("global " + arg[0]);
         else if (command == "$include") outtextendl("%include " + arg[0]);
-        else if (command == "goto") outtextendl("jmp " + arg[0]);
+        else if (command == "$section") outtextendl("section " + arg[0]);
+        else if (command == "goto") {
+            if (arg.size() >= 2) outtextendl(arg[1] + " " + arg[0]);
+            else if (arg.size() >= 1) outtextendl("jmp " + arg[0]);
+        }
         else if (command == "int") outtextendl("int " + arg[0]);
-
         else if (command2 == "=") mov(command, command3);
+        else if (command2 == "b=") mov("byte "+command, command3);
         else if (command2 == "+=") outtextendl("add " + command + ", " + command3);
         else if (command2 == "-=") outtextendl("sub " + command + ", " + command3);
+        else if (command2 == "--") outtextendl("dec " + command);
+        else if (command2 == "++") outtextendl("inc " + command);
         else if (command2 == "1=") outtextendl(command + " db " + line.substr(command.length()+4, line.length()-(command.length()+4)));
         else if (command2 == "2=") outtextendl(command + " dw " + line.substr(command.length()+4, line.length()-(command.length()+4)));
         else if (command2 == "4=") outtextendl(command + " dd " + line.substr(command.length()+4, line.length()-(command.length()+4)));
         else if (command2 == "8=") outtextendl(command + " dq " + line.substr(command.length()+4, line.length()-(command.length()+4)));
+
+        else if (command == "1=") outtextendl("db " + line.substr(3, line.length()-3));
+        else if (command == "2=") outtextendl("dw " + line.substr(3, line.length()-3));
+        else if (command == "4=") outtextendl("dd " + line.substr(3, line.length()-3));
+        else if (command == "8=") outtextendl("dq " + line.substr(3, line.length()-3));
         else cmf = true;
     }
 
