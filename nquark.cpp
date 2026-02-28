@@ -137,10 +137,10 @@ void chkcom() {
         else if (command2 == "=") mov(command, command3);
         else if (command2 == "+=") outtextendl("add " + command + ", " + command3);
         else if (command2 == "-=") outtextendl("sub " + command + ", " + command3);
-        else if (command2 == "1=") outtextendl(command + " db " + arg[0]);
-        else if (command2 == "2=") outtextendl(command + " dw " + arg[0]);
-        else if (command2 == "4=") outtextendl(command + " dd " + arg[0]);
-        else if (command2 == "8=") outtextendl(command + " dq " + arg[0]);
+        else if (command2 == "1=") outtextendl(command + " db " + line.substr(command.length()+4, line.length()-(command.length()+4)));
+        else if (command2 == "2=") outtextendl(command + " dw " + line.substr(command.length()+4, line.length()-(command.length()+4)));
+        else if (command2 == "4=") outtextendl(command + " dd " + line.substr(command.length()+4, line.length()-(command.length()+4)));
+        else if (command2 == "8=") outtextendl(command + " dq " + line.substr(command.length()+4, line.length()-(command.length()+4)));
         else cmf = true;
     }
 
