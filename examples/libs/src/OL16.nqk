@@ -3,6 +3,8 @@ $share(printstr)
 $share(readch)
 $share(cls)
 $share(exit)
+$share(strcmp)
+$share(chkcmd)
 
 func printch()
     ah = 0x0e
@@ -11,8 +13,7 @@ end
 
 func printstr()
     `lodsb`
-    `or al, al`
-    `jz .done`
+    if(al, ==, 0, .done)
     ah = 0x0e
     int(0x10)
     goto(printstr)
@@ -32,38 +33,26 @@ end
 func exit()
     goto($)
 end
-$share(printch)
-$share(printstr)
-$share(readch)
-$share(cls)
-$share(exit)
 
-func printch()
-    `mov ah, 0x0e`
-    `int 0x10`
+func strcmp
+func .loop
+    al = [si]
+    bl = [di]
+    if(al,!=,bl,.not_equal)
+    if(al, ==, 0, .equal)
+    si ++
+    di ++
+    goto(.loop)
+func .not_equal
+    `clc`
+end
+func .equal
+    `stc`
 end
 
-func printstr()
-    `lodsb`
-    `or al, al`
-    `jz .done`
-    `mov ah, 0x0e`
-    `int 0x10`
-    `jmp printstr`
-func .done
+func chkcmd
+    printstr($si, |, endl)
+    strcmp($si,|,buffer)
 end
 
-func cls()
-    `mov ax, 0x0003`
-    `int 0x10`
-end
-
-func readch()
-    `mov ah, 0x00`
-    `int 0x16`
-end
-
-func exit()
-    `jmp $`
-end
-
+`buffer  times 64 db 0`
