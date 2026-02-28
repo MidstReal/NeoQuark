@@ -1,13 +1,12 @@
 $share(_start)
 $include("libs/linux.asm")
 
-`section .text`
+$section(.text)
 
 func _start()
-    ; print($rsi, $rdx, |, var, line_length)
-
-    print($rsi, $rdx, |, msg, 13)
+    print($rsi, $rdx, |, msg, 23)
     exit
 
-`section .data`
-msg 1= "Hello, Linux!"
+$section(.data)
+
+msg 1= "Hello, Linux!",10
