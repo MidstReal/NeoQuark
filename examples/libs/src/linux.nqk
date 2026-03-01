@@ -1,12 +1,32 @@
 $share(print)
+$share(read)
 $share(exit)
+$share(strlen)
 
-func print()
+func print
     rax = 1
+    rdi = 1
     `syscall`
 end
 
-func exit()
+func read
+    rdx = rsi
+    rsi = rdi
+    rdi = 0
+    rax = 0
+    `syscall`
+end
+
+func exit
     rax = 60
     `syscall`
+end
+
+func strlen
+    `xor rax, rax`
+func .loop
+    if([rdi + rax], ==, 0, .done, BYTE)
+    rax ++
+    goto(.loop)
+func .done
 end
