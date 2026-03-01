@@ -135,12 +135,16 @@ void chkcom() {
         else if (command == ";" || command == "#") {}
         else if (command == "$share") outtextendl("global " + arg[0]);
         else if (command == "$include") outtextendl("%include " + arg[0]);
+        else if (command == "$bin") outtextendl("incbin " + arg[0]);
         else if (command == "$section") outtextendl("section " + arg[0]);
+        else if (command == "$org") outtextendl("org " + arg[0]);
         else if (command == "goto") {
             if (arg.size() >= 2) outtextendl(arg[1] + " " + arg[0]);
             else if (arg.size() >= 1) outtextendl("jmp " + arg[0]);
         }
         else if (command == "int") outtextendl("int " + arg[0]);
+        else if (command == "reserve") outtextendl("times " + arg[0] + " db " + arg[1]);
+
         else if (command2 == "=") mov(command, command3);
         else if (command2 == "b=") mov("byte "+command, command3);
         else if (command2 == "w=") mov("word "+command, command3);
@@ -160,6 +164,19 @@ void chkcom() {
         else if (command2 == "w++") outtextendl("inc word " + command);
         else if (command2 == "d++") outtextendl("inc dword " + command);
         else if (command2 == "q++") outtextendl("inc qword " + command);
+
+        else if (command2 == "&=")  outtextendl("and " + command + ", " + command3);
+        else if (command2 == "|=")  outtextendl("or " + command + ", " + command3);
+        else if (command2 == "^=")  outtextendl("xor " + command + ", " + command3);
+        else if (command2 == "~")   outtextendl("not " + command);
+
+        else if (command2 == "<<")  outtextendl("shl " + command + ", " + command3);
+        else if (command2 == ">>")  outtextendl("shr " + command + ", " + command3);
+        else if (command2 == "sar") outtextendl("sar " + command + ", " + command3);
+        else if (command2 == "rol") outtextendl("rol " + command + ", " + command3);
+        else if (command2 == "ror") outtextendl("ror " + command + ", " + command3);
+
+        else if (command2 == "??")  outtextendl("test " + command + ", " + command3);
 
         else if (command2 == "1=") outtextendl(command + " db " + line.substr(command.length()+4, line.length()-(command.length()+4)));
         else if (command2 == "2=") outtextendl(command + " dw " + line.substr(command.length()+4, line.length()-(command.length()+4)));
