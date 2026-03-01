@@ -132,7 +132,7 @@ void chkcom() {
         }
         else if (command[command.length()-1] == ':') outtextendl(command);
         else if (command == "end") outtextendl("ret");
-        else if (command == ";") {}
+        else if (command == ";" || command == "#") {}
         else if (command == "$share") outtextendl("global " + arg[0]);
         else if (command == "$include") outtextendl("%include " + arg[0]);
         else if (command == "$section") outtextendl("section " + arg[0]);
@@ -143,14 +143,29 @@ void chkcom() {
         else if (command == "int") outtextendl("int " + arg[0]);
         else if (command2 == "=") mov(command, command3);
         else if (command2 == "b=") mov("byte "+command, command3);
+        else if (command2 == "w=") mov("word "+command, command3);
+        else if (command2 == "d=") mov("dword "+command, command3);
+        else if (command2 == "q=") mov("qword "+command, command3);
         else if (command2 == "+=") outtextendl("add " + command + ", " + command3);
         else if (command2 == "-=") outtextendl("sub " + command + ", " + command3);
+
         else if (command2 == "--") outtextendl("dec " + command);
+        else if (command2 == "b--") outtextendl("dec byte " + command);
+        else if (command2 == "w--") outtextendl("dec word " + command);
+        else if (command2 == "d--") outtextendl("dec dword " + command);
+        else if (command2 == "q--") outtextendl("dec qword" + command);
+
         else if (command2 == "++") outtextendl("inc " + command);
+        else if (command2 == "b++") outtextendl("inc byte " + command);
+        else if (command2 == "w++") outtextendl("inc word " + command);
+        else if (command2 == "d++") outtextendl("inc dword " + command);
+        else if (command2 == "q++") outtextendl("inc qword " + command);
+
         else if (command2 == "1=") outtextendl(command + " db " + line.substr(command.length()+4, line.length()-(command.length()+4)));
         else if (command2 == "2=") outtextendl(command + " dw " + line.substr(command.length()+4, line.length()-(command.length()+4)));
         else if (command2 == "4=") outtextendl(command + " dd " + line.substr(command.length()+4, line.length()-(command.length()+4)));
         else if (command2 == "8=") outtextendl(command + " dq " + line.substr(command.length()+4, line.length()-(command.length()+4)));
+        else if (command2 == "c=") outtextendl(command + " equ " + line.substr(command.length()+4, line.length()-(command.length()+4)));
 
         else if (command == "1=") outtextendl("db " + line.substr(3, line.length()-3));
         else if (command == "2=") outtextendl("dw " + line.substr(3, line.length()-3));
