@@ -11,10 +11,10 @@ ofstream out;
 string line;
 int linenum = 1;
 
-int maxargsB = 0;
-int maxargsW = 0;
-int maxargsDW = 0;
-int maxargsQW = 0;
+bool mode64 = false;
+bool mode32 = false;
+bool mode16 = false;
+bool mode8 = false;
 
 void outtext(string text){
     out << text;
@@ -41,7 +41,7 @@ void chkcom() {
     for (int i = 0; i < line.length(); i++) {
         if (line[i] == '`' && !inqt) { inasm = !inasm; continue; }
         if (inasm) { asmstr += line[i]; continue; }
-        if (line[i] == '"' || line[i] == '\'') {
+        if (line[i] == '"') {
             inqt = !inqt;
             if (inbkt) {
                 if (curarg >= arg.size()) arg.push_back("");
@@ -76,33 +76,7 @@ void chkcom() {
     bool cmf = false;
     if (!command.empty()) {
         if (command == "func") {
-            outtextendl(command2 + ":");
-
-            int div = -1;
-            for (int i = 0; i < arg.size(); i++) if (arg[i] == "|") { div = i; break; }
-
-            if (div != -1) {
-                int b = 0, w = 0, dw = 0, qw = 0;
-                for (int i = div + 1; i < arg.size(); i++) {
-                    int tpos = i - (div + 1);
-                    if (tpos < div) {
-                        string type = arg[tpos];
-                        string val = arg[i];
-                        char vt1 = type[0];
-                        string final = "";
-                        bool reg = false;
-
-                        final+=type.substr(1, type.length()-1);
-
-                        if (vt1 == 'B') mov("byte " + final, val);
-                        else if (vt1== 'W') mov("word " + final, val);
-                        else if (vt1 == 'D') mov("dword " + final, val);
-                        else if (vt1 == 'Q') mov("qword " + final, val);
-                        else if (vt1 == '$') mov(final, val);
-                    }
-                }
-            }
-            
+            outtextendl(command2 + ":");      
         } 
         else if (command == "if"){
             string type;
@@ -132,18 +106,32 @@ void chkcom() {
         }
         else if (command[command.length()-1] == ':') outtextendl(command);
         else if (command == "end") outtextendl("ret");
-        else if (command == ";" || command == "#") {}
+        else if (command == ";") {}
         else if (command == "$share") outtextendl("global " + arg[0]);
         else if (command == "$include") outtextendl("%include " + arg[0]);
         else if (command == "$bin") outtextendl("incbin " + arg[0]);
         else if (command == "$section") outtextendl("section " + arg[0]);
         else if (command == "$org") outtextendl("org " + arg[0]);
+        else if (command == "$use") outtextendl("extern " + arg[0]);
+        else if (command == "#mode64") {mode64 = true; mode32 = false; mode16 = false; mode8 = false;}
+        else if (command == "#mode32") {mode32 = true; mode64 = false; mode16 = false; mode8 = false;}
+        else if (command == "#mode16") {mode16 = true; mode32 = false; mode64 = false; mode8 = false;}
+        else if (command == "#mode8")  {mode8 = true; mode32 = false; mode16 = false; mode64 = false;}
         else if (command == "goto") {
             if (arg.size() >= 2) outtextendl(arg[1] + " " + arg[0]);
             else if (arg.size() >= 1) outtextendl("jmp " + arg[0]);
         }
         else if (command == "int") outtextendl("int " + arg[0]);
-        else if (command == "reserve") outtextendl("times " + arg[0] + " db " + arg[1]);
+        else if (command == "reserve") {
+            if (arg.size() >= 2) {
+                if (arg[1] == "1?") outtextendl("resb " + arg[0]);
+                else if (arg[1] == "2?") outtextendl("resw " + arg[0]);
+                else if (arg[1] == "4?") outtextendl("resd " + arg[0]);
+                else if (arg[1] == "8?") outtextendl("resq " + arg[0]);
+                else outtextendl("times " + arg[0] + " db " + arg[1]);
+            } else if (arg.size() >= 1) outtextendl("resb " + arg[0]);
+        }
+        else if (command == "align") outtextendl("align " + arg[0]);
 
         else if (command2 == "=") mov(command, command3);
         else if (command2 == "b=") mov("byte "+command, command3);
@@ -157,7 +145,7 @@ void chkcom() {
         else if (command2 == "b--") outtextendl("dec byte " + command);
         else if (command2 == "w--") outtextendl("dec word " + command);
         else if (command2 == "d--") outtextendl("dec dword " + command);
-        else if (command2 == "q--") outtextendl("dec qword" + command);
+        else if (command2 == "q--") outtextendl("dec qword " + command);
 
         else if (command2 == "++") outtextendl("inc " + command);
         else if (command2 == "b++") outtextendl("inc byte " + command);
@@ -178,6 +166,11 @@ void chkcom() {
 
         else if (command2 == "??")  outtextendl("test " + command + ", " + command3);
 
+        else if (command == "->") outtextendl("push " + command2);
+        else if (command == "<-") outtextendl("pop " + command2);
+
+        else if (command2 == "<=>") outtextendl("xchg " + command + ", " + command3);
+
         else if (command2 == "1=") outtextendl(command + " db " + line.substr(command.length()+4, line.length()-(command.length()+4)));
         else if (command2 == "2=") outtextendl(command + " dw " + line.substr(command.length()+4, line.length()-(command.length()+4)));
         else if (command2 == "4=") outtextendl(command + " dd " + line.substr(command.length()+4, line.length()-(command.length()+4)));
@@ -192,42 +185,112 @@ void chkcom() {
     }
 
     if (!func.empty() && cmf) {
-        int div = -1;
-        for (int i = 0; i < arg.size(); i++) if (arg[i] == "|") { div = i; break; }
+        if(mode64) {
+            if(arg.size() >= 1) { outtextendl("push rax"); }
+            if(arg.size() >= 2) { outtextendl("push rcx"); }
+            if(arg.size() >= 3) { outtextendl("push rdx"); }
+            if(arg.size() >= 4) { outtextendl("push rbx"); }
+            if(arg.size() >= 5) { outtextendl("push rsi"); }
+            if(arg.size() >= 6) { outtextendl("push rdi"); }
+            
+            if(arg.size() >= 1) { mov("rax", arg[0]); }
+            if(arg.size() >= 2) { mov("rcx", arg[1]); }
+            if(arg.size() >= 3) { mov("rdx", arg[2]); }
+            if(arg.size() >= 4) { mov("rbx", arg[3]); }
+            if(arg.size() >= 5) { mov("rsi", arg[4]); }
+            if(arg.size() >= 6) { mov("rdi", arg[5]); }
+            
+            outtextendl("call " + func);
 
-        if (div != -1) {
-            int b = 0, w = 0, dw = 0, qw = 0;
-            for (int i = div + 1; i < arg.size(); i++) {
-                int tpos = i - (div + 1);
-                if (tpos < div) {
-                    string type = arg[tpos];
-                    string val = arg[i];
-                    char vt1 = type[0];
-                    string final = "";
-                    bool reg = false;
-
-                    final+=type.substr(1, type.length()-1);
-
-                    if (vt1 == 'B') mov("byte " + final, val);
-                    else if (vt1== 'W') mov("word " + final, val);
-                    else if (vt1 == 'D') mov("dword " + final, val);
-                    else if (vt1 == 'Q') mov("qword " + final, val);
-                    else if (vt1 == '$') mov(final, val);
-                }
-            }
+            if(arg.size() >= 6) { outtextendl("pop rdi"); }
+            if(arg.size() >= 5) { outtextendl("pop rsi"); }
+            if(arg.size() >= 4) { outtextendl("pop rbx"); }
+            if(arg.size() >= 3) { outtextendl("pop rdx"); }
+            if(arg.size() >= 2) { outtextendl("pop rcx"); }
+            if(arg.size() >= 1) { outtextendl("pop rax"); }
         }
-        outtextendl("call " + func);
+        else if(mode32) {
+            if(arg.size() >= 1) { outtextendl("push eax"); }
+            if(arg.size() >= 2) { outtextendl("push ecx"); }
+            if(arg.size() >= 3) { outtextendl("push edx"); }
+            if(arg.size() >= 4) { outtextendl("push ebx"); }
+            if(arg.size() >= 5) { outtextendl("push esi"); }
+            if(arg.size() >= 6) { outtextendl("push edi"); }
+            
+            if(arg.size() >= 1) { mov("eax", arg[0]); }
+            if(arg.size() >= 2) { mov("ecx", arg[1]); }
+            if(arg.size() >= 3) { mov("edx", arg[2]); }
+            if(arg.size() >= 4) { mov("ebx", arg[3]); }
+            if(arg.size() >= 5) { mov("esi", arg[4]); }
+            if(arg.size() >= 6) { mov("edi", arg[5]); }
+            
+            outtextendl("call " + func);
+            
+            if(arg.size() >= 6) { outtextendl("pop edi"); }
+            if(arg.size() >= 5) { outtextendl("pop esi"); }
+            if(arg.size() >= 4) { outtextendl("pop ebx"); }
+            if(arg.size() >= 3) { outtextendl("pop edx"); }
+            if(arg.size() >= 2) { outtextendl("pop ecx"); }
+            if(arg.size() >= 1) { outtextendl("pop eax"); }
+        }
+        else if(mode16) {
+            if(arg.size() >= 1) { outtextendl("push ax"); }
+            if(arg.size() >= 2) { outtextendl("push cx"); }
+            if(arg.size() >= 3) { outtextendl("push dx"); }
+            if(arg.size() >= 4) { outtextendl("push bx"); }
+            if(arg.size() >= 5) { outtextendl("push si"); }
+            if(arg.size() >= 6) { outtextendl("push di"); }
+            
+            if(arg.size() >= 1) { mov("ax", arg[0]); }
+            if(arg.size() >= 2) { mov("cx", arg[1]); }
+            if(arg.size() >= 3) { mov("dx", arg[2]); }
+            if(arg.size() >= 4) { mov("bx", arg[3]); }
+            if(arg.size() >= 5) { mov("si", arg[4]); }
+            if(arg.size() >= 6) { mov("di", arg[5]); }
+            
+            outtextendl("call " + func);
+            
+            if(arg.size() >= 6) { outtextendl("pop di"); }
+            if(arg.size() >= 5) { outtextendl("pop si"); }
+            if(arg.size() >= 4) { outtextendl("pop bx"); }
+            if(arg.size() >= 3) { outtextendl("pop dx"); }
+            if(arg.size() >= 2) { outtextendl("pop cx"); }
+            if(arg.size() >= 1) { outtextendl("pop ax"); }
+        }
+        else if(mode8) {
+            if(arg.size() >= 1) { outtextendl("push ax"); }
+            if(arg.size() >= 2) { outtextendl("push cx"); }
+            if(arg.size() >= 3) { outtextendl("push dx"); }
+            if(arg.size() >= 4) { outtextendl("push bx"); }
+            if(arg.size() >= 5) { outtextendl("push si"); }
+            if(arg.size() >= 6) { outtextendl("push di"); }
+            
+            outtextendl("call " + func);
+
+            if(arg.size() >= 6) { outtextendl("pop di"); }
+            if(arg.size() >= 5) { outtextendl("pop si"); }
+            if(arg.size() >= 4) { outtextendl("pop bx"); }
+            if(arg.size() >= 3) { outtextendl("pop dx"); }
+            if(arg.size() >= 2) { outtextendl("pop cx"); }
+            if(arg.size() >= 1) { outtextendl("pop ax"); }
+        }
     }
 }
 int main(int argc, char* argv[]){
     string inputFile = argv[1];
     string outputFile = argv[2];
 
-    if (argc >= 4 && string(argv[2]) == "-o") {
+    if (argc >= 5 && string(argv[2]) == "-o") {
         outputFile = argv[3];
     } else if (argc >= 3) {
         outputFile = argv[2];
     }
+
+    if (argc >= 5 && string(argv[4]) == "64bits"){mode64 = true;}
+    else if (argc >= 5 && string(argv[4]) == "32bits"){mode32 = true;}
+    else if (argc >= 5 && string(argv[4]) == "16bits"){mode16 = true;}
+    else if (argc >= 5 && string(argv[4]) == "8bits"){mode8 = true;}
+    else {mode16 = true;}
 
     in.open(inputFile);
     out.open(outputFile);
