@@ -1,12 +1,12 @@
-`org 0x7c00`
-
+$org(0x7c00)
 goto(_start)
 
 $include("libs/OL16.asm")
 
 func _start
     cls
-    printstr($si, |, msg)
+    si = msg
+    printstr
     exit
 
 msg 1= "Hello, BIOS!",0x0a,0x0d
