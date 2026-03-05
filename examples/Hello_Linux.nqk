@@ -3,8 +3,8 @@ $include("libs/linux.asm")
 
 $section(.text)
 
-func _start()
-    print($rsi, $rdx, |, msg, 23)
+func _start
+    print(msg, 23)
     exit
 
 $section(.data)
