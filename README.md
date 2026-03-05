@@ -4,19 +4,23 @@ The NeoQuark programming language
 compiler:
 ```
 g++ nquark.cpp -o nquark
-./nquark input.nqk -o output.asm
 ```
 program for linux:
 ```
-./nquark input.nqk -o output.asm
+./nquark input.nqk -o output.asm 64bits
 
 nasm -f elf64 output.asm -o prog.o
 ld prog.o -o prog
 
 ./prog
 ```
-program bin for own os:
+program bin for own 16-bit os:
 ```
-nasm -f bin output.asm -o boot.bin
-qemu-system-x86_64 boot.bin
+./nquark input.nqk -o output.asm 16bits
+nasm -f bin output.asm -o file.bin
+```
+program bin for own 32-bit os:
+```
+./nquark input.nqk -o output.asm 32bits
+nasm -f bin output.asm -o file.bin
 ```
