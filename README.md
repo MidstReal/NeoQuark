@@ -7,7 +7,7 @@ bash bd.sh
 ```
 program for linux:
 ```
-./nquark input.nqk -o output.asm 64bits
+./nquark input.nqk -o output.asm -64
 
 nasm -f elf64 output.asm -o prog.o
 ld prog.o -o prog
@@ -16,11 +16,11 @@ ld prog.o -o prog
 ```
 program bin for own 16-bit os:
 ```
-./nquark input.nqk -o output.asm 16bits
+./nquark input.nqk -o output.asm -16
 nasm -f bin output.asm -o file.bin
 ```
 program bin for own 32-bit os:
 ```
-./nquark input.nqk -o output.asm 32bits
+./nquark input.nqk -o output.asm -32
 nasm -f bin output.asm -o file.bin
 ```
