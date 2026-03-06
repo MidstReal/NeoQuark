@@ -1,5 +1,5 @@
 # NeoQuark
-The NeoQuark programming language
+NeoQuark is a programming language designed to simplify working with the NASM assembler.
 # Compile
 compiler:
 ```
