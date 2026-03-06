@@ -19,10 +19,10 @@ int main(int argc, char* argv[]){
         outputFile = argv[2];
     }
 
-    if (argc >= 5 && string(argv[4]) == "64bits"){mode64 = true;}
-    else if (argc >= 5 && string(argv[4]) == "32bits"){mode32 = true;}
-    else if (argc >= 5 && string(argv[4]) == "16bits"){mode16 = true;}
-    else if (argc >= 5 && string(argv[4]) == "8bits"){mode8 = true;}
+    if (argc >= 5 && string(argv[4]) == "-64"){mode64 = true;}
+    else if (argc >= 5 && string(argv[4]) == "-32"){mode32 = true;}
+    else if (argc >= 5 && string(argv[4]) == "-16"){mode16 = true;}
+    else if (argc >= 5 && string(argv[4]) == "-8"){mode8 = true;}
     else {mode16 = true;}
 
     in.open(inputFile);
