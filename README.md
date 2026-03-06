@@ -3,7 +3,7 @@ The NeoQuark programming language
 # Compile
 compiler:
 ```
-g++ nquark.cpp -o nquark
+bash bd.sh
 ```
 program for linux:
 ```
