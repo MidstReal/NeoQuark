@@ -91,10 +91,10 @@ void chkcom() {
         else if (command == "$org") outtextendl("org " + arg[0]);
         else if (command == "$bits") outtextendl("bits " + arg[0]);
         else if (command == "$use") outtextendl("extern " + arg[0]);
-        else if (command == "#mode64") {mode64 = true; mode32 = false; mode16 = false; mode8 = false;}
-        else if (command == "#mode32") {mode32 = true; mode64 = false; mode16 = false; mode8 = false;}
-        else if (command == "#mode16") {mode16 = true; mode32 = false; mode64 = false; mode8 = false;}
-        else if (command == "#mode8")  {mode8 = true; mode32 = false; mode16 = false; mode64 = false;}
+        else if (command == "#64mode") {mode64 = true; mode32 = false; mode16 = false; mode8 = false;}
+        else if (command == "#32mode") {mode32 = true; mode64 = false; mode16 = false; mode8 = false;}
+        else if (command == "#16mode") {mode16 = true; mode32 = false; mode64 = false; mode8 = false;}
+        else if (command == "#8mode")  {mode8 = true; mode32 = false; mode16 = false; mode64 = false;}
         else if (command == "goto") {
             if (arg.size() >= 2) outtextendl(arg[1] + " " + arg[0]);
             else if (arg.size() >= 1) outtextendl("jmp " + arg[0]);
