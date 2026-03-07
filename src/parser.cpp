@@ -167,94 +167,50 @@ void chkcom() {
     }
 
     if (!func.empty() && cmf) {
+        string regs64[] = {"rax","rcx","rdx","rbx","rsi","rdi"};
+        string regs32[] = {"eax","ecx","edx","ebx","esi","edi"};
+        string regs16[] = {"ax","cx","dx","bx","si","di"};
+        string regs8[] = {"al","cl","dl","bl","sil","dil"};
+
         if(mode64) {
-            if(arg.size() >= 1) { outtextendl("push rax"); }
-            if(arg.size() >= 2) { outtextendl("push rcx"); }
-            if(arg.size() >= 3) { outtextendl("push rdx"); }
-            if(arg.size() >= 4) { outtextendl("push rbx"); }
-            if(arg.size() >= 5) { outtextendl("push rsi"); }
-            if(arg.size() >= 6) { outtextendl("push rdi"); }
+            int count = min((int)arg.size(), 6);
             
-            if(arg.size() >= 1) { mov("rax", arg[0]); }
-            if(arg.size() >= 2) { mov("rcx", arg[1]); }
-            if(arg.size() >= 3) { mov("rdx", arg[2]); }
-            if(arg.size() >= 4) { mov("rbx", arg[3]); }
-            if(arg.size() >= 5) { mov("rsi", arg[4]); }
-            if(arg.size() >= 6) { mov("rdi", arg[5]); }
+            for (int i = 0;i<count;i++) outtextendl("push " + regs64[i]);
+            for (int i = 0;i<count;i++) mov(regs64[i], arg[i]);
             
             outtextendl("call " + func);
-
-            if(arg.size() >= 6) { outtextendl("pop rdi"); }
-            if(arg.size() >= 5) { outtextendl("pop rsi"); }
-            if(arg.size() >= 4) { outtextendl("pop rbx"); }
-            if(arg.size() >= 3) { outtextendl("pop rdx"); }
-            if(arg.size() >= 2) { outtextendl("pop rcx"); }
-            if(arg.size() >= 1) { outtextendl("pop rax"); }
+            
+            for (int i = count-1;i>=0;i--) outtextendl("pop " + regs64[i]); 
         }
         else if(mode32) {
-            if(arg.size() >= 1) { outtextendl("push eax"); }
-            if(arg.size() >= 2) { outtextendl("push ecx"); }
-            if(arg.size() >= 3) { outtextendl("push edx"); }
-            if(arg.size() >= 4) { outtextendl("push ebx"); }
-            if(arg.size() >= 5) { outtextendl("push esi"); }
-            if(arg.size() >= 6) { outtextendl("push edi"); }
+            int count = min((int)arg.size(), 6);
             
-            if(arg.size() >= 1) { mov("eax", arg[0]); }
-            if(arg.size() >= 2) { mov("ecx", arg[1]); }
-            if(arg.size() >= 3) { mov("edx", arg[2]); }
-            if(arg.size() >= 4) { mov("ebx", arg[3]); }
-            if(arg.size() >= 5) { mov("esi", arg[4]); }
-            if(arg.size() >= 6) { mov("edi", arg[5]); }
+            for (int i = 0;i<count;i++) outtextendl("push " + regs32[i]);
+            for (int i = 0;i<count;i++) mov(regs32[i], arg[i]);
             
             outtextendl("call " + func);
             
-            if(arg.size() >= 6) { outtextendl("pop edi"); }
-            if(arg.size() >= 5) { outtextendl("pop esi"); }
-            if(arg.size() >= 4) { outtextendl("pop ebx"); }
-            if(arg.size() >= 3) { outtextendl("pop edx"); }
-            if(arg.size() >= 2) { outtextendl("pop ecx"); }
-            if(arg.size() >= 1) { outtextendl("pop eax"); }
+            for (int i = count-1;i>=0;i--) outtextendl("pop " + regs32[i]);
         }
         else if(mode16) {
-            if(arg.size() >= 1) { outtextendl("push ax"); }
-            if(arg.size() >= 2) { outtextendl("push cx"); }
-            if(arg.size() >= 3) { outtextendl("push dx"); }
-            if(arg.size() >= 4) { outtextendl("push bx"); }
-            if(arg.size() >= 5) { outtextendl("push si"); }
-            if(arg.size() >= 6) { outtextendl("push di"); }
+            int count = min((int)arg.size(), 6);
             
-            if(arg.size() >= 1) { mov("ax", arg[0]); }
-            if(arg.size() >= 2) { mov("cx", arg[1]); }
-            if(arg.size() >= 3) { mov("dx", arg[2]); }
-            if(arg.size() >= 4) { mov("bx", arg[3]); }
-            if(arg.size() >= 5) { mov("si", arg[4]); }
-            if(arg.size() >= 6) { mov("di", arg[5]); }
+            for (int i = 0;i<count;i++) outtextendl("push " + regs16[i]);
+            for (int i = 0;i<count;i++) mov(regs16[i], arg[i]);
             
             outtextendl("call " + func);
             
-            if(arg.size() >= 6) { outtextendl("pop di"); }
-            if(arg.size() >= 5) { outtextendl("pop si"); }
-            if(arg.size() >= 4) { outtextendl("pop bx"); }
-            if(arg.size() >= 3) { outtextendl("pop dx"); }
-            if(arg.size() >= 2) { outtextendl("pop cx"); }
-            if(arg.size() >= 1) { outtextendl("pop ax"); }
+            for (int i = count-1;i>=0;i--) outtextendl("pop " + regs16[i]);
         }
         else if(mode8) {
-            if(arg.size() >= 1) { outtextendl("push ax"); }
-            if(arg.size() >= 2) { outtextendl("push cx"); }
-            if(arg.size() >= 3) { outtextendl("push dx"); }
-            if(arg.size() >= 4) { outtextendl("push bx"); }
-            if(arg.size() >= 5) { outtextendl("push si"); }
-            if(arg.size() >= 6) { outtextendl("push di"); }
+            int count = min((int)arg.size(), 6);
+            
+            for (int i = 0;i<count;i++) outtextendl("push " + regs16[i]);
+            for (int i = 0;i<count;i++) mov(regs8[i], arg[i]);
             
             outtextendl("call " + func);
-
-            if(arg.size() >= 6) { outtextendl("pop di"); }
-            if(arg.size() >= 5) { outtextendl("pop si"); }
-            if(arg.size() >= 4) { outtextendl("pop bx"); }
-            if(arg.size() >= 3) { outtextendl("pop dx"); }
-            if(arg.size() >= 2) { outtextendl("pop cx"); }
-            if(arg.size() >= 1) { outtextendl("pop ax"); }
+            
+            for (int i = count-1;i>=0;i--) outtextendl("pop " + regs16[i]);
         }
     }
 }
