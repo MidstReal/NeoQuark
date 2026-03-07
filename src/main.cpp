@@ -11,19 +11,15 @@ int main(int argc, char* argv[]){
     mode8 = false;
 
     string inputFile = argv[1];
-    string outputFile = argv[2];
+    string outputFile;
 
-    if (argc >= 5 && string(argv[2]) == "-o") {
-        outputFile = argv[3];
-    } else if (argc >= 3) {
-        outputFile = argv[2];
-    }
+    if (argc >= 5 && string(argv[2]) == "-o") outputFile = argv[3];
 
     if (argc >= 5 && string(argv[4]) == "-64"){mode64 = true;}
     else if (argc >= 5 && string(argv[4]) == "-32"){mode32 = true;}
     else if (argc >= 5 && string(argv[4]) == "-16"){mode16 = true;}
     else if (argc >= 5 && string(argv[4]) == "-8"){mode8 = true;}
-    else {mode16 = true;}
+    else {mode64 = true;}
 
     in.open(inputFile);
     out.open(outputFile);

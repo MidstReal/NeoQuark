@@ -9,13 +9,14 @@ void chkcom() {
     if (first == string::npos) return;
     line = line.substr(first);
 
-    string command = "", command2 = "", command3 = "", func = "", asmstr = "";
+    string command = "", command2 = "", command3 = "", command4 = "", func = "", asmstr = "";
     vector<string> arg;
     bool inbkt = false, inqt = false, inasm = false;
     int cmdp = 1;
     int curarg = 0;
 
     for (int i = 0; i < line.length(); i++) {
+        if (line[i] == ';' && !inqt) break;
         if (line[i] == '`' && !inqt) { inasm = !inasm; continue; }
         if (inasm) { asmstr += line[i]; continue; }
         if (line[i] == '"') {
@@ -42,6 +43,7 @@ void chkcom() {
             if (cmdp == 1) { command += line[i]; func += line[i]; }
             else if(cmdp == 2) command2 += line[i]; 
             else if(cmdp == 3) command3 += line[i]; 
+            else if(cmdp == 4) command4 += line[i]; 
         } else {
             if (curarg >= arg.size()) arg.push_back("");
             arg[curarg] += line[i];
@@ -59,20 +61,18 @@ void chkcom() {
             string type;
 
             if (arg.size() >= 5){
-                if (arg[4] == "BYTE"){
+                if (arg[4] == "1b"){
                     type = "byte ";
-                } else if(arg[4] == "WORD"){
+                } else if(arg[4] == "2b"){
                     type = "word ";
-                } else if(arg[4] == "DWORD"){
+                } else if(arg[4] == "4b"){
                     type = "dword ";
-                } else if(arg[4] == "QWORD"){
+                } else if(arg[4] == "8b"){
                     type = "qword ";
                 }
             }
 
-
             outtextendl("cmp "+ type + arg[0] + ", " + arg[2]);
-
 
             if (arg[1] == "!=") out << "jne " << arg[3] << endl;
             else if (arg[1] == "==") out << "je " << arg[3] << endl;
@@ -83,12 +83,13 @@ void chkcom() {
         }
         else if (command[command.length()-1] == ':') outtextendl(command);
         else if (command == "end") outtextendl("ret");
-        else if (command == ";") {}
+        else if (command == "syscall") outtextendl("syscall");
         else if (command == "$share") outtextendl("global " + arg[0]);
         else if (command == "$include") outtextendl("%include " + arg[0]);
         else if (command == "$bin") outtextendl("incbin " + arg[0]);
         else if (command == "$section") outtextendl("section " + arg[0]);
         else if (command == "$org") outtextendl("org " + arg[0]);
+        else if (command == "$bits") outtextendl("bits " + arg[0]);
         else if (command == "$use") outtextendl("extern " + arg[0]);
         else if (command == "#mode64") {mode64 = true; mode32 = false; mode16 = false; mode8 = false;}
         else if (command == "#mode32") {mode32 = true; mode64 = false; mode16 = false; mode8 = false;}
@@ -143,21 +144,25 @@ void chkcom() {
 
         else if (command2 == "??")  outtextendl("test " + command + ", " + command3);
 
-        else if (command == "->") outtextendl("push " + command2);
-        else if (command == "<-") outtextendl("pop " + command2);
+        else if (command == "<-") outtextendl("push " + command2);
+        else if (command == "->") outtextendl("pop " + command2);
+        else if (command == "<-<") outtextendl("pusha");
+        else if (command == ">->") outtextendl("popa");
 
         else if (command2 == "<=>") outtextendl("xchg " + command + ", " + command3);
 
-        else if (command2 == "1=") outtextendl(command + " db " + line.substr(command.length()+4, line.length()-(command.length()+4)));
-        else if (command2 == "2=") outtextendl(command + " dw " + line.substr(command.length()+4, line.length()-(command.length()+4)));
-        else if (command2 == "4=") outtextendl(command + " dd " + line.substr(command.length()+4, line.length()-(command.length()+4)));
-        else if (command2 == "8=") outtextendl(command + " dq " + line.substr(command.length()+4, line.length()-(command.length()+4)));
-        else if (command2 == "c=") outtextendl(command + " equ " + line.substr(command.length()+4, line.length()-(command.length()+4)));
+        //byte a = 10
+        else if (command == "byte" || command == "char") outtextendl(command2 + " db " + line.substr(line.find('=') + 1));
+        else if (command == "short")  outtextendl(command2 + " dw " + line.substr(line.find('=') + 1));
+        else if (command == "int")    outtextendl(command2 + " dd " + line.substr(line.find('=') + 1));
+        else if (command == "bigint") outtextendl(command2 + " dq " + line.substr(line.find('=') + 1));
+        else if (command == "const")  outtextendl(command2 + " equ " + line.substr(line.find('=') + 1));
 
-        else if (command == "1=") outtextendl("db " + line.substr(3, line.length()-3));
-        else if (command == "2=") outtextendl("dw " + line.substr(3, line.length()-3));
-        else if (command == "4=") outtextendl("dd " + line.substr(3, line.length()-3));
-        else if (command == "8=") outtextendl("dq " + line.substr(3, line.length()-3));
+
+        else if (command == "<1=") outtextendl("db " + line.substr(3, line.length()-3));
+        else if (command == "<2=") outtextendl("dw " + line.substr(3, line.length()-3));
+        else if (command == "<4=") outtextendl("dd " + line.substr(3, line.length()-3));
+        else if (command == "<8=") outtextendl("dq " + line.substr(3, line.length()-3));
         else cmf = true;
     }
 
