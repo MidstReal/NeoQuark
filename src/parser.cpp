@@ -110,6 +110,7 @@ void chkcom() {
             } else if (arg.size() >= 1) outtextendl("resb " + arg[0]);
         }
         else if (command == "align") outtextendl("align " + arg[0]);
+        else if (command == "lea") outtextendl("lea " + arg[0] + ", " + arg[1]);
 
         else if (command2 == "=") mov(command, command3);
         else if (command2 == "b=") mov("byte "+command, command3);
@@ -176,8 +177,10 @@ void chkcom() {
             int count = min((int)arg.size(), 6);
             
             for (int i = 0;i<count;i++) outtextendl("push " + regs64[i]);
-            for (int i = 0;i<count;i++) mov(regs64[i], arg[i]);
-            
+            for (int i = 0;i<count;i++) {
+                if(arg[i][0] == '|') outtextendl("movzx " + regs64[i]+", "+ arg[i].substr(1,arg[i].length()-1));
+                else mov(regs64[i], arg[i]);
+            }
             outtextendl("call " + func);
             
             for (int i = count-1;i>=0;i--) outtextendl("pop " + regs64[i]); 
@@ -186,7 +189,10 @@ void chkcom() {
             int count = min((int)arg.size(), 6);
             
             for (int i = 0;i<count;i++) outtextendl("push " + regs32[i]);
-            for (int i = 0;i<count;i++) mov(regs32[i], arg[i]);
+            for (int i = 0;i<count;i++) {
+                if(arg[i][0] == '|') outtextendl("movzx " + regs32[i]+", "+ arg[i].substr(1,arg[i].length()-1));
+                else mov(regs32[i], arg[i]);
+            }
             
             outtextendl("call " + func);
             
@@ -196,7 +202,10 @@ void chkcom() {
             int count = min((int)arg.size(), 6);
             
             for (int i = 0;i<count;i++) outtextendl("push " + regs16[i]);
-            for (int i = 0;i<count;i++) mov(regs16[i], arg[i]);
+            for (int i = 0;i<count;i++) {
+                if(arg[i][0] == '|') outtextendl("movzx " + regs16[i]+", "+ arg[i].substr(1,arg[i].length()-1));
+                else mov(regs16[i], arg[i]);
+            }
             
             outtextendl("call " + func);
             
@@ -206,7 +215,10 @@ void chkcom() {
             int count = min((int)arg.size(), 6);
             
             for (int i = 0;i<count;i++) outtextendl("push " + regs16[i]);
-            for (int i = 0;i<count;i++) mov(regs8[i], arg[i]);
+            for (int i = 0;i<count;i++) {
+                if(arg[i][0] == '|') outtextendl("movzx " + regs8[i]+", "+ arg[i].substr(1,arg[i].length()-1));
+                else mov(regs8[i], arg[i]);
+            }
             
             outtextendl("call " + func);
             
