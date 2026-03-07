@@ -1,0 +1,61 @@
+; This code is intended for compiler version 07/03/26.
+
+const MB_ALIGN = 1 << 0
+const MB_MEMINFO = 1 << 1
+const MB_FLAGS = MB_ALIGN | MB_MEMINFO
+const MB_MAGIC = 0x1BADB002
+const MB_CHECKSUM = -(MB_MAGIC + MB_FLAGS)
+
+$section(.multiboot)
+    align(4)
+<4= MB_MAGIC
+<4= MB_FLAGS
+<4= MB_CHECKSUM
+
+$section(.text)
+
+$share(_start)
+func _start
+    esp = stack_top
+
+    printstr(msg, 0, 0x0f)
+
+    `hlt`
+
+func printstr
+    <- ebx
+    <- esi
+    esi = eax
+    
+    func .loop
+        al = [esi]
+        if(al, ==, 0, .end)
+
+        printch(|al, ecx, edx)
+
+        esi ++
+        ecx ++
+        goto(.loop)
+
+    func .end
+    -> esi
+    -> ebx
+end
+
+func printch
+    <- ebx
+    edx << 8
+    eax &= 0xff
+    eax |= edx
+    lea(ebx, [0xb8000 + ecx * 2])
+    [ebx] = ax
+    -> ebx
+end
+$section(.data)
+
+char msg = "Hello, multiboot!",0
+
+$section(.bss)
+    align(16)
+    reserve(8192, 1?)
+stack_top:
