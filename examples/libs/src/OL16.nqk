@@ -3,8 +3,6 @@ $share(printstr)
 $share(readch)
 $share(cls)
 $share(exit)
-$share(strcmp)
-$share(chkcmd)
 
 func printch()
     ah = 0x0e
@@ -32,27 +30,6 @@ end
 
 func exit()
     goto($)
-end
-
-func strcmp
-func .loop
-    al = [si]
-    bl = [di]
-    if(al,!=,bl,.not_equal)
-    if(al, ==, 0, .equal)
-    si ++
-    di ++
-    goto(.loop)
-func .not_equal
-    `clc`
-end
-func .equal
-    `stc`
-end
-
-func chkcmd
-    printstr($si, |, endl)
-    strcmp($si,|,buffer)
 end
 
 `buffer  times 64 db 0`

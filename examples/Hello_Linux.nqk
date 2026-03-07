@@ -9,4 +9,4 @@ func _start
 
 $section(.data)
 
-msg 1= "Hello, Linux!",10
+char msg = "Hello, Linux!",10

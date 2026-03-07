@@ -4,28 +4,30 @@ $share(exit)
 $share(strlen)
 
 func print
+    rsi = rax 
+    rdx = rcx
     rax = 1
     rdi = 1
-    `syscall`
+    syscall
 end
 
 func read
-    rdx = rsi
-    rsi = rdi
+    rdx = rax
+    rsi = rcx
     rdi = 0
     rax = 0
-    `syscall`
+    syscall
 end
 
 func exit
     rax = 60
-    `syscall`
+    syscall
 end
 
 func strlen
-    `xor rax, rax`
+    rax ^= rax
 func .loop
-    if([rdi + rax], ==, 0, .done, BYTE)
+    if([rdi + rax], ==, 0, .done, 1b)
     rax ++
     goto(.loop)
 func .done
