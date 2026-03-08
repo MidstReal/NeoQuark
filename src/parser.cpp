@@ -63,6 +63,8 @@ void chkcom() {
         }
         else if(command == "endn") outtextendl("iend");
         else if(command == "at") outtext("at " + command2 +", ");
+        
+        else if (command == "cmp") outtextendl("cmp " + arg[0] + ", " + arg[1]);
         else if (command == "if"){
             string type;
 
@@ -105,8 +107,10 @@ void chkcom() {
             if (arg.size() >= 2) outtextendl(arg[1] + " " + arg[0]);
             else if (arg.size() >= 1) outtextendl("jmp " + arg[0]);
         }
+        else if (command == "in") outtextendl("in " + arg[0] + ", " + arg[1]);
+        else if (command == "out") outtextendl("out " + arg[0] + ", " + arg[1]);
         else if (command == "int") outtextendl("int " + arg[0]);
-        else if (command == "reserve" || command2 == "reserve") {
+        else if (command == "reserve") {
             if (arg.size() >= 2) {
                 if (arg[1] == "1?") outtextendl("resb " + arg[0]);
                 else if (arg[1] == "2?") outtextendl("resw " + arg[0]);
@@ -118,6 +122,7 @@ void chkcom() {
         else if (command == "align") outtextendl("align " + arg[0]);
         else if (command == "lea") outtextendl("lea " + arg[0] + ", " + arg[1]);
 
+        else if (command2 == "=0") outtextendl("movzx " + command + ", " + command3);
         else if (command2 == "=") mov(command, command3);
         else if (command2 == "b=") mov("byte "+command, command3);
         else if (command2 == "w=") mov("word "+command, command3);
@@ -196,6 +201,7 @@ void chkcom() {
 
             for (int i = 0;i<count;i++) {
                 if(arg[i][0] == '|') outtextendl("movzx " + regs64[i]+", "+ arg[i].substr(1,arg[i].length()-1));
+                else if(arg[i][0] == '/') outtextendl("lea " + regs64[i]+", "+ arg[i].substr(1,arg[i].length()-1));
                 else mov(regs64[i], arg[i]);
             }
             outtextendl("call " + func);
@@ -208,6 +214,7 @@ void chkcom() {
             for (int i = 0;i<count;i++) outtextendl("push " + regs32[i]);
             for (int i = 0;i<count;i++) {
                 if(arg[i][0] == '|') outtextendl("movzx " + regs32[i]+", "+ arg[i].substr(1,arg[i].length()-1));
+                else if(arg[i][0] == '/') outtextendl("lea " + regs32[i]+", "+ arg[i].substr(1,arg[i].length()-1));
                 else mov(regs32[i], arg[i]);
             }
             
@@ -221,6 +228,7 @@ void chkcom() {
             for (int i = 0;i<count;i++) outtextendl("push " + regs16[i]);
             for (int i = 0;i<count;i++) {
                 if(arg[i][0] == '|') outtextendl("movzx " + regs16[i]+", "+ arg[i].substr(1,arg[i].length()-1));
+                else if(arg[i][0] == '/') outtextendl("lea " + regs16[i]+", "+ arg[i].substr(1,arg[i].length()-1));
                 else mov(regs16[i], arg[i]);
             }
             
@@ -234,6 +242,7 @@ void chkcom() {
             for (int i = 0;i<count;i++) outtextendl("push " + regs16[i]);
             for (int i = 0;i<count;i++) {
                 if(arg[i][0] == '|') outtextendl("movzx " + regs8[i]+", "+ arg[i].substr(1,arg[i].length()-1));
+                else if(arg[i][0] == '/') outtextendl("lea " + regs8[i]+", "+ arg[i].substr(1,arg[i].length()-1));
                 else mov(regs8[i], arg[i]);
             }
             
