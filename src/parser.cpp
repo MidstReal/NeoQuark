@@ -54,9 +54,15 @@ void chkcom() {
 
     bool cmf = false;
     if (!command.empty()) {
-        if (command == "func") {
-            outtextendl(command2 + ":");      
-        } 
+        if (command == "func") outtextendl(command2 + ":");      
+        else if(command == "struct")outtextendl("struc " + command2);
+        else if(command == "ends")outtextendl("endstruc");
+        else if(command == "new"){
+            outtextendl(command2 + ":");
+            outtextendl("istruc "+arg[0]);
+        }
+        else if(command == "endn") outtextendl("iend");
+        else if(command == "at") outtext("at " + command2 +", ");
         else if (command == "if"){
             string type;
 
@@ -100,7 +106,7 @@ void chkcom() {
             else if (arg.size() >= 1) outtextendl("jmp " + arg[0]);
         }
         else if (command == "int") outtextendl("int " + arg[0]);
-        else if (command == "reserve") {
+        else if (command == "reserve" || command2 == "reserve") {
             if (arg.size() >= 2) {
                 if (arg[1] == "1?") outtextendl("resb " + arg[0]);
                 else if (arg[1] == "2?") outtextendl("resw " + arg[0]);
@@ -119,6 +125,16 @@ void chkcom() {
         else if (command2 == "q=") mov("qword "+command, command3);
         else if (command2 == "+=") outtextendl("add " + command + ", " + command3);
         else if (command2 == "-=") outtextendl("sub " + command + ", " + command3);
+        else if (command2 == "*=") outtextendl("imul " + command + ", " + command3);
+        else if (command2 == "/=") {
+            outtextendl("xor rdx, rdx");
+            outtextendl("idiv " + command3);
+        }
+        else if (command2 == "%=") {
+            outtextendl("xor rdx, rdx");
+            outtextendl("idiv " + command3);
+            outtextendl("mov " + command + ", rdx");
+        }
 
         else if (command2 == "--") outtextendl("dec " + command);
         else if (command2 == "b--") outtextendl("dec byte " + command);
@@ -152,7 +168,6 @@ void chkcom() {
 
         else if (command2 == "<=>") outtextendl("xchg " + command + ", " + command3);
 
-        //byte a = 10
         else if (command == "byte" || command == "char") outtextendl(command2 + " db " + line.substr(line.find('=') + 1));
         else if (command == "short")  outtextendl(command2 + " dw " + line.substr(line.find('=') + 1));
         else if (command == "int")    outtextendl(command2 + " dd " + line.substr(line.find('=') + 1));
@@ -160,10 +175,11 @@ void chkcom() {
         else if (command == "const")  outtextendl(command2 + " equ " + line.substr(line.find('=') + 1));
 
 
-        else if (command == "<1=") outtextendl("db " + line.substr(3, line.length()-3));
-        else if (command == "<2=") outtextendl("dw " + line.substr(3, line.length()-3));
-        else if (command == "<4=") outtextendl("dd " + line.substr(3, line.length()-3));
-        else if (command == "<8=") outtextendl("dq " + line.substr(3, line.length()-3));
+        else if (command == "<1=" || command == "<b=") outtextendl("db " + line.substr(3, line.length()-3));
+        else if (command == "<2=" || command == "<w=") outtextendl("dw " + line.substr(3, line.length()-3));
+        else if (command == "<4=" || command == "<d=") outtextendl("dd " + line.substr(3, line.length()-3));
+        else if (command == "<8=" || command == "<q=") outtextendl("dq " + line.substr(3, line.length()-3));
+        else if (command == "<c=") outtextendl("equ " + line.substr(3, line.length()-3));
         else cmf = true;
     }
 
@@ -177,6 +193,7 @@ void chkcom() {
             int count = min((int)arg.size(), 6);
             
             for (int i = 0;i<count;i++) outtextendl("push " + regs64[i]);
+
             for (int i = 0;i<count;i++) {
                 if(arg[i][0] == '|') outtextendl("movzx " + regs64[i]+", "+ arg[i].substr(1,arg[i].length()-1));
                 else mov(regs64[i], arg[i]);
