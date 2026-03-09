@@ -179,6 +179,13 @@ void chkcom() {
         else if (command == "bigint") outtextendl(command2 + " dq " + line.substr(line.find('=') + 1));
         else if (command == "const")  outtextendl(command2 + " equ " + line.substr(line.find('=') + 1));
 
+        else if (command == "res"){
+            if(command2 == "byte") outtextendl(command3 + " resb " + line.substr(line.find('=') + 1));
+            else if(command2 == "short") outtextendl(command3 + " resw " + line.substr(line.find('=') + 1));
+            else if(command2 == "int") outtextendl(command3 + " resd " + line.substr(line.find('=') + 1));
+            else if(command2 == "bigint") outtextendl(command3 + " resq " + line.substr(line.find('=') + 1));
+        }
+
 
         else if (command == "<1=" || command == "<b=") outtextendl("db " + line.substr(3, line.length()-3));
         else if (command == "<2=" || command == "<w=") outtextendl("dw " + line.substr(3, line.length()-3));
@@ -197,58 +204,63 @@ void chkcom() {
         if(mode64) {
             int count = min((int)arg.size(), 6);
             
-            for (int i = 0;i<count;i++) outtextendl("push " + regs64[i]);
+            for (int i = 0; i < count; i++) if(arg[i][0] != '$') outtextendl("push " + regs64[i]);
 
-            for (int i = 0;i<count;i++) {
-                if(arg[i][0] == '|') outtextendl("movzx " + regs64[i]+", "+ arg[i].substr(1,arg[i].length()-1));
-                else if(arg[i][0] == '/') outtextendl("lea " + regs64[i]+", "+ arg[i].substr(1,arg[i].length()-1));
-                else mov(regs64[i], arg[i]);
+            for (int i = 0; i < count; i++) {
+                string a = (arg[i][0] == '$') ? arg[i].substr(1) : arg[i];
+                if(a[0] == '|') outtextendl("movzx " + regs64[i] + ", " + a.substr(1));
+                else if(a[0] == '/') outtextendl("lea " + regs64[i] + ", " + a.substr(1));
+                else mov(regs64[i], a);
             }
             outtextendl("call " + func);
             
-            for (int i = count-1;i>=0;i--) outtextendl("pop " + regs64[i]); 
+            for (int i = count - 1; i >= 0; i--) if(arg[i][0] != '$') outtextendl("pop " + regs64[i]); 
         }
         else if(mode32) {
             int count = min((int)arg.size(), 6);
             
-            for (int i = 0;i<count;i++) outtextendl("push " + regs32[i]);
-            for (int i = 0;i<count;i++) {
-                if(arg[i][0] == '|') outtextendl("movzx " + regs32[i]+", "+ arg[i].substr(1,arg[i].length()-1));
-                else if(arg[i][0] == '/') outtextendl("lea " + regs32[i]+", "+ arg[i].substr(1,arg[i].length()-1));
-                else mov(regs32[i], arg[i]);
+            for (int i = 0; i < count; i++) if(arg[i][0] != '$') outtextendl("push " + regs32[i]);
+            for (int i = 0; i < count; i++) {
+                string a = (arg[i][0] == '$') ? arg[i].substr(1) : arg[i];
+                if(a[0] == '|') outtextendl("movzx " + regs32[i] + ", " + a.substr(1));
+                else if(a[0] == '/') outtextendl("lea " + regs32[i] + ", " + a.substr(1));
+                else mov(regs32[i], a);
             }
             
             outtextendl("call " + func);
             
-            for (int i = count-1;i>=0;i--) outtextendl("pop " + regs32[i]);
+            for (int i = count - 1; i >= 0; i--) if(arg[i][0] != '$') outtextendl("pop " + regs32[i]);
         }
         else if(mode16) {
             int count = min((int)arg.size(), 6);
             
-            for (int i = 0;i<count;i++) outtextendl("push " + regs16[i]);
-            for (int i = 0;i<count;i++) {
-                if(arg[i][0] == '|') outtextendl("movzx " + regs16[i]+", "+ arg[i].substr(1,arg[i].length()-1));
-                else if(arg[i][0] == '/') outtextendl("lea " + regs16[i]+", "+ arg[i].substr(1,arg[i].length()-1));
-                else mov(regs16[i], arg[i]);
+            for (int i = 0; i < count; i++) if(arg[i][0] != '$') outtextendl("push " + regs16[i]);
+            for (int i = 0; i < count; i++) {
+                string a = (arg[i][0] == '$') ? arg[i].substr(1) : arg[i];
+                if(a[0] == '|') outtextendl("movzx " + regs16[i] + ", " + a.substr(1));
+                else if(a[0] == '/') outtextendl("lea " + regs16[i] + ", " + a.substr(1));
+                else mov(regs16[i], a);
             }
             
             outtextendl("call " + func);
             
-            for (int i = count-1;i>=0;i--) outtextendl("pop " + regs16[i]);
+            for (int i = count - 1; i >= 0; i--) if(arg[i][0] != '$') outtextendl("pop " + regs16[i]);
         }
         else if(mode8) {
             int count = min((int)arg.size(), 6);
             
-            for (int i = 0;i<count;i++) outtextendl("push " + regs16[i]);
-            for (int i = 0;i<count;i++) {
-                if(arg[i][0] == '|') outtextendl("movzx " + regs8[i]+", "+ arg[i].substr(1,arg[i].length()-1));
-                else if(arg[i][0] == '/') outtextendl("lea " + regs8[i]+", "+ arg[i].substr(1,arg[i].length()-1));
-                else mov(regs8[i], arg[i]);
+            for (int i = 0; i < count; i++) if(arg[i][0] != '$') outtextendl("push " + regs16[i]);
+            for (int i = 0; i < count; i++) {
+                string a = (arg[i][0] == '$') ? arg[i].substr(1) : arg[i];
+                if(a[0] == '|') outtextendl("movzx " + regs8[i] + ", " + a.substr(1));
+                else if(a[0] == '/') outtextendl("lea " + regs8[i] + ", " + a.substr(1));
+                else mov(regs8[i], a);
             }
             
             outtextendl("call " + func);
             
-            for (int i = count-1;i>=0;i--) outtextendl("pop " + regs16[i]);
+            for (int i = count - 1; i >= 0; i--) if(arg[i][0] != '$') outtextendl("pop " + regs16[i]);
         }
     }
+
 }
