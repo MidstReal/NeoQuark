@@ -11,12 +11,12 @@ void chkcom() {
 
     string command = "", command2 = "", command3 = "", command4 = "", func = "", asmstr = "";
     vector<string> arg;
-    bool inbkt = false, inqt = false, inasm = false;
+    bool inbkt = false, inqt = false, inasm = false, insqbkt = false;
     int cmdp = 1;
     int curarg = 0;
 
     for (int i = 0; i < line.length(); i++) {
-        if (line[i] == ';' && !inqt) break;
+        if (line[i] == ';' && !inqt && !insqbkt) break;
         if (line[i] == '`' && !inqt) { inasm = !inasm; continue; }
         if (inasm) { asmstr += line[i]; continue; }
         if (line[i] == '"') {
@@ -24,18 +24,35 @@ void chkcom() {
             if (inbkt) {
                 if (curarg >= arg.size()) arg.push_back("");
                 arg[curarg] += line[i];
+            } else if (insqbkt) {
+                if (cmdp == 1) command += line[i];
+                else if(cmdp == 2) command2 += line[i];
+                else if(cmdp == 3) command3 += line[i];
+                else if(cmdp == 4) command4 += line[i];
             }
             continue;
         }
         if (inqt) {
-            if (curarg >= arg.size()) arg.push_back("");
-            arg[curarg] += line[i];
+            if (inbkt) {
+                if (curarg >= arg.size()) arg.push_back("");
+                arg[curarg] += line[i];
+            } else if (insqbkt) {
+                if (cmdp == 1) command += line[i];
+                else if(cmdp == 2) command2 += line[i];
+                else if(cmdp == 3) command3 += line[i];
+                else if(cmdp == 4) command4 += line[i];
+            }
             continue;
         }
+        if (line[i] == '[' && !inbkt) { insqbkt = true; }
+        if (line[i] == ']' && !inbkt) { insqbkt = false; }
         if (line[i] == '(') { inbkt = true; cmdp = 0; continue; }
         if (line[i] == ')') { inbkt = false; continue; }
-        if (line[i] == ',') { curarg++; continue; }
-        if (line[i] == ' ' || line[i] == '\t') {
+        if (line[i] == ',') { 
+            if (inbkt) curarg++; 
+            continue; 
+        }
+        if ((line[i] == ' ' || line[i] == '\t') && !insqbkt) {
             if (!inqt && !inbkt) cmdp++;
             if (!inbkt) continue;
         }
@@ -103,6 +120,9 @@ void chkcom() {
         else if (command == "syscall") outtextendl("syscall");
         else if (command == "$share") outtextendl("global " + arg[0]);
         else if (command == "$include") outtextendl("%include " + arg[0]);
+        else if (command == "$define") outtextendl("%define " + arg[0]);
+        else if (command == "$macro") outtextendl("%macro " + command2 + " " + arg[0]);
+        else if (command == "$endmacro") outtextendl("%endmacro");
         else if (command == "$bin") outtextendl("incbin " + arg[0]);
         else if (command == "$section") outtextendl("section " + arg[0]);
         else if (command == "$org") outtextendl("org " + arg[0]);
@@ -213,13 +233,13 @@ void chkcom() {
     }
 
     if (!func.empty() && cmf) {
-        string regs64[] = {"rax","rcx","rdx","rbx","rsi","rdi"};
-        string regs32[] = {"eax","ecx","edx","ebx","esi","edi"};
-        string regs16[] = {"ax","cx","dx","bx","si","di"};
-        string regs8[] = {"al","cl","dl","bl","sil","dil"};
+        string regs64[] = {"rax","rcx","rdx","rbx","rsi","rdi","r8","r9","r10","r11","r12","r13","r14","r15"};
+        string regs32[] = {"eax","ecx","edx","ebx","esi","edi","r8d","r9d","r10d","r11d","r12d","r13d","r14d","r15d"};
+        string regs16[] = {"ax","cx","dx","bx","si","di","r8w","r9w","r10w","r11w","r12w","r13w","r14w","r15w"};
+        string regs8[] = {"al","cl","dl","bl","sil","dil","r8b","r9b","r10b","r11b","r12b","r13b","r14b","r15b"};
 
         if(mode64) {
-            int count = min((int)arg.size(), 6);
+            int count = min((int)arg.size(), 14);
             
             for (int i = 0; i < count; i++) if(arg[i][0] != '$') outtextendl("push " + regs64[i]);
 
@@ -234,7 +254,7 @@ void chkcom() {
             for (int i = count - 1; i >= 0; i--) if(arg[i][0] != '$') outtextendl("pop " + regs64[i]); 
         }
         else if(mode32) {
-            int count = min((int)arg.size(), 6);
+            int count = min((int)arg.size(), 14);
             
             for (int i = 0; i < count; i++) if(arg[i][0] != '$') outtextendl("push " + regs32[i]);
             for (int i = 0; i < count; i++) {
@@ -249,7 +269,7 @@ void chkcom() {
             for (int i = count - 1; i >= 0; i--) if(arg[i][0] != '$') outtextendl("pop " + regs32[i]);
         }
         else if(mode16) {
-            int count = min((int)arg.size(), 6);
+            int count = min((int)arg.size(), 14);
             
             for (int i = 0; i < count; i++) if(arg[i][0] != '$') outtextendl("push " + regs16[i]);
             for (int i = 0; i < count; i++) {
@@ -264,7 +284,7 @@ void chkcom() {
             for (int i = count - 1; i >= 0; i--) if(arg[i][0] != '$') outtextendl("pop " + regs16[i]);
         }
         else if(mode8) {
-            int count = min((int)arg.size(), 6);
+            int count = min((int)arg.size(), 14);
             
             for (int i = 0; i < count; i++) if(arg[i][0] != '$') outtextendl("push " + regs16[i]);
             for (int i = 0; i < count; i++) {
