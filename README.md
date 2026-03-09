@@ -19,8 +19,3 @@ program bin for own 16-bit os:
 ./nquark input.nqk -o output.asm -16
 nasm -f bin output.asm -o file.bin
 ```
-program bin for own 32-bit os:
-```
-./nquark input.nqk -o output.asm -32
-nasm -f bin output.asm -o file.bin
-```
