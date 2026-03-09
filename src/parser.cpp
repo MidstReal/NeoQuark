@@ -37,7 +37,7 @@ void chkcom() {
         if (line[i] == ',') { curarg++; continue; }
         if (line[i] == ' ' || line[i] == '\t') {
             if (!inqt && !inbkt) cmdp++;
-            continue;
+            if (!inbkt) continue;
         }
         if (!inbkt) {
             if (cmdp == 1) { command += line[i]; func += line[i]; }
@@ -47,6 +47,15 @@ void chkcom() {
         } else {
             if (curarg >= arg.size()) arg.push_back("");
             arg[curarg] += line[i];
+        }
+    }
+
+    for (auto& a : arg) {
+        size_t start = a.find_first_not_of(" \t");
+        if (start != string::npos) {
+            a = a.substr(start);
+        } else {
+            a = "";
         }
     }
 
@@ -110,6 +119,14 @@ void chkcom() {
         else if (command == "in") outtextendl("in " + arg[0] + ", " + arg[1]);
         else if (command == "out") outtextendl("out " + arg[0] + ", " + arg[1]);
         else if (command == "int") outtextendl("int " + arg[0]);
+        else if (command == "repe" || command == "repz") outtextendl("repe " + command2);
+        else if (command == "repne" || command == "repnz") outtextendl("repne " + command2);
+        else if (command == "lock") outtextendl("lock " + command2);
+        else if (command == "nop") outtextendl("nop");
+        else if (command == "hlt") outtextendl("hlt");
+        else if (command == "cli") outtextendl("cli");
+        else if (command == "sti") outtextendl("sti");
+        else if (command == "leave") outtextendl("leave");
         else if (command == "reserve") {
             if (arg.size() >= 2) {
                 if (arg[1] == "1?") outtextendl("resb " + arg[0]);
