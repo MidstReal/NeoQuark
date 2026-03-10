@@ -14,14 +14,17 @@ void chkcom() {
     bool inbkt = false, inqt = false, inasm = false, insqbkt = false;
     int cmdp = 1;
     int curarg = 0;
-    
+
     for (int i = 0; i < line.length(); i++) {
         if (line[i] == ';' && !inqt && !insqbkt) break;
         if (line[i] == '`' && !inqt) { inasm = !inasm; continue; }
         if (inasm) { asmstr += line[i]; continue; }
         if (line[i] == '"') {
             inqt = !inqt;
-            if (insqbkt) {
+            if (inbkt) {
+                if (curarg >= arg.size()) arg.push_back("");
+                arg[curarg] += line[i];
+            } else if (insqbkt) {
                 if (cmdp == 1) command += line[i];
                 else if(cmdp == 2) command2 += line[i];
                 else if(cmdp == 3) command3 += line[i];
