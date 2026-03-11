@@ -167,6 +167,8 @@ void chkcom() {
         else if (command2 == "q=") mov("qword "+command, command3);
         else if (command2 == "+=") outtextendl("add " + command + ", " + command3);
         else if (command2 == "-=") outtextendl("sub " + command + ", " + command3);
+        else if (command2 == "*=|") outtextendl("mul " + command + ", " + command3);
+        else if (command2 == "/=|") outtextendl("div " + command);
         else if (command2 == "*=") outtextendl("imul " + command + ", " + command3);
         else if (command2 == "/=") {
             outtextendl("xor rdx, rdx");
