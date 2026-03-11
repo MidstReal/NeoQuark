@@ -4,6 +4,24 @@
 
 using namespace std;
 
+void funcCall(const string* regs, int count, const vector<string>& arg, const string& func) {
+    if (!mode8) {
+        for (int i = 0; i < count; i++) if(arg[i][0] != '$') outtextendl("push " + regs[i]);
+    }
+
+    for (int i = 0; i < count; i++) {
+        string a = (arg[i][0] == '$') ? arg[i].substr(1) : arg[i];
+        if(a[0] == '|') outtextendl("movzx " + regs[i] + ", " + a.substr(1));
+        else if(a[0] == '/') outtextendl("lea " + regs[i] + ", " + a.substr(1));
+        else mov(regs[i], a);
+    }
+    outtextendl("call " + func);
+    
+    if (!mode8) {
+        for (int i = count - 1; i >= 0; i--) if(arg[i][0] != '$') outtextendl("pop " + regs[i]);
+    }
+}
+
 void chkcom() {
     size_t first = line.find_first_not_of(" \t");
     if (first == string::npos) return;
@@ -77,7 +95,7 @@ void chkcom() {
     }
 
     if (!asmstr.empty()) outtextendl(asmstr);
-
+    string aft = line.substr(line.find('=') + 1);
     bool cmf = false;
     if (!command.empty()) {
         if (command == "func") outtextendl(command2 + ":");      
@@ -117,7 +135,7 @@ void chkcom() {
         }
         else if (command[command.length()-1] == ':') outtextendl(command);
         else if (command == "end") outtextendl("ret");
-        else if (command == "syscall") outtextendl("syscall");
+        else if (command == "syscall") {if(arg.size() <= 0) outtextendl("syscall"); else {mov("rax", arg[0]);outtextendl("syscall");}}
         else if (command == "$share") outtextendl("global " + arg[0]);
         else if (command == "$include") outtextendl("%include " + arg[0]);
         else if (command == "$define") outtextendl("%define " + arg[0]);
@@ -159,6 +177,10 @@ void chkcom() {
         else if (command == "align") outtextendl("align " + arg[0]);
         else if (command == "lea") outtextendl("lea " + arg[0] + ", " + arg[1]);
 
+        else if (command2 == "str=") {for(int i =1;i<aft.length(); i++) {
+            if (aft[i] == '"') continue;
+            outtextendl("mov byte [" + command + "+" + to_string(i-1) + "]" ", '" + aft[i] + "'");
+        }; outtextendl("mov byte [" + command + "+" + to_string(aft.length()-1) + "]" + ", 0");}
         else if (command2 == "=0") outtextendl("movzx " + command + ", " + command3);
         else if (command2 == "=") mov(command, command3);
         else if (command2 == "b=") mov("byte "+command, command3);
@@ -212,17 +234,17 @@ void chkcom() {
 
         else if (command2 == "<=>") outtextendl("xchg " + command + ", " + command3);
 
-        else if (command == "byte" || command == "char") outtextendl(command2 + " db " + line.substr(line.find('=') + 1));
-        else if (command == "short")  outtextendl(command2 + " dw " + line.substr(line.find('=') + 1));
-        else if (command == "int")    outtextendl(command2 + " dd " + line.substr(line.find('=') + 1));
-        else if (command == "bigint") outtextendl(command2 + " dq " + line.substr(line.find('=') + 1));
-        else if (command == "const")  outtextendl(command2 + " equ " + line.substr(line.find('=') + 1));
+        else if (command == "byte" || command == "char") outtextendl(command2 + " db " + aft);
+        else if (command == "short")  outtextendl(command2 + " dw " + aft);
+        else if (command == "int")    outtextendl(command2 + " dd " + aft);
+        else if (command == "bigint") outtextendl(command2 + " dq " + aft);
+        else if (command == "const")  outtextendl(command2 + " equ " + aft);
 
         else if (command == "res"){
-            if(command2 == "byte") outtextendl(command3 + " resb " + line.substr(line.find('=') + 1));
-            else if(command2 == "short") outtextendl(command3 + " resw " + line.substr(line.find('=') + 1));
-            else if(command2 == "int") outtextendl(command3 + " resd " + line.substr(line.find('=') + 1));
-            else if(command2 == "bigint") outtextendl(command3 + " resq " + line.substr(line.find('=') + 1));
+            if(command2 == "byte") outtextendl(command3 + " resb " + aft);
+            else if(command2 == "short") outtextendl(command3 + " resw " + aft);
+            else if(command2 == "int") outtextendl(command3 + " resd " + aft);
+            else if(command2 == "bigint") outtextendl(command3 + " resq " + aft);
         }
 
 
@@ -236,70 +258,16 @@ void chkcom() {
 
     if (!func.empty() && cmf) {
         string regs64[] = {"rax","rcx","rdx","rbx","rsi","rdi","r8","r9","r10","r11","r12","r13","r14","r15"};
-        string regs32[] = {"eax","ecx","edx","ebx","esi","edi","r8d","r9d","r10d","r11d","r12d","r13d","r14d","r15d"};
-        string regs16[] = {"ax","cx","dx","bx","si","di","r8w","r9w","r10w","r11w","r12w","r13w","r14w","r15w"};
-        string regs8[] = {"al","cl","dl","bl","sil","dil","r8b","r9b","r10b","r11b","r12b","r13b","r14b","r15b"};
+        string regs32[] = {"eax","ecx","edx","ebx","esi","edi"};
+        string regs16[] = {"ax","cx","dx","bx","si","di","bp","sp"};
+        string regs8[]  = {"al","cl","dl","bl","ah","ch","dh","bh"};
 
-        if(mode64) {
-            int count = min((int)arg.size(), 14);
-            
-            for (int i = 0; i < count; i++) if(arg[i][0] != '$') outtextendl("push " + regs64[i]);
-
-            for (int i = 0; i < count; i++) {
-                string a = (arg[i][0] == '$') ? arg[i].substr(1) : arg[i];
-                if(a[0] == '|') outtextendl("movzx " + regs64[i] + ", " + a.substr(1));
-                else if(a[0] == '/') outtextendl("lea " + regs64[i] + ", " + a.substr(1));
-                else mov(regs64[i], a);
-            }
-            outtextendl("call " + func);
-            
-            for (int i = count - 1; i >= 0; i--) if(arg[i][0] != '$') outtextendl("pop " + regs64[i]); 
-        }
-        else if(mode32) {
-            int count = min((int)arg.size(), 14);
-            
-            for (int i = 0; i < count; i++) if(arg[i][0] != '$') outtextendl("push " + regs32[i]);
-            for (int i = 0; i < count; i++) {
-                string a = (arg[i][0] == '$') ? arg[i].substr(1) : arg[i];
-                if(a[0] == '|') outtextendl("movzx " + regs32[i] + ", " + a.substr(1));
-                else if(a[0] == '/') outtextendl("lea " + regs32[i] + ", " + a.substr(1));
-                else mov(regs32[i], a);
-            }
-            
-            outtextendl("call " + func);
-            
-            for (int i = count - 1; i >= 0; i--) if(arg[i][0] != '$') outtextendl("pop " + regs32[i]);
-        }
-        else if(mode16) {
-            int count = min((int)arg.size(), 14);
-            
-            for (int i = 0; i < count; i++) if(arg[i][0] != '$') outtextendl("push " + regs16[i]);
-            for (int i = 0; i < count; i++) {
-                string a = (arg[i][0] == '$') ? arg[i].substr(1) : arg[i];
-                if(a[0] == '|') outtextendl("movzx " + regs16[i] + ", " + a.substr(1));
-                else if(a[0] == '/') outtextendl("lea " + regs16[i] + ", " + a.substr(1));
-                else mov(regs16[i], a);
-            }
-            
-            outtextendl("call " + func);
-            
-            for (int i = count - 1; i >= 0; i--) if(arg[i][0] != '$') outtextendl("pop " + regs16[i]);
-        }
-        else if(mode8) {
-            int count = min((int)arg.size(), 14);
-            
-            for (int i = 0; i < count; i++) if(arg[i][0] != '$') outtextendl("push " + regs16[i]);
-            for (int i = 0; i < count; i++) {
-                string a = (arg[i][0] == '$') ? arg[i].substr(1) : arg[i];
-                if(a[0] == '|') outtextendl("movzx " + regs8[i] + ", " + a.substr(1));
-                else if(a[0] == '/') outtextendl("lea " + regs8[i] + ", " + a.substr(1));
-                else mov(regs8[i], a);
-            }
-            
-            outtextendl("call " + func);
-            
-            for (int i = count - 1; i >= 0; i--) if(arg[i][0] != '$') outtextendl("pop " + regs16[i]);
-        }
+        int count = min((int)arg.size(), 14);
+        
+        if(mode64) funcCall(regs64, count, arg, func);
+        else if(mode32) funcCall(regs32, count, arg, func);
+        else if(mode16) funcCall(regs16, count, arg, func);
+        else if(mode8) funcCall(regs8, count, arg, func);
     }
 
 }
