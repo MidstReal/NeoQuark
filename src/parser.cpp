@@ -5,20 +5,33 @@
 using namespace std;
 
 void funcCall(const string* regs, int count, const vector<string>& arg, const string& func) {
-    if (!mode8) {
-        for (int i = 0; i < count; i++) if(arg[i][0] != '$') outtextendl("push " + regs[i]);
-    }
+    if (line[line.find('(') - 1] == '&') {
+        for(int i = 0; i<arg.size();i++) outtextendl("push " + arg[i]);
 
-    for (int i = 0; i < count; i++) {
-        string a = (arg[i][0] == '$') ? arg[i].substr(1) : arg[i];
-        if(a[0] == '|') outtextendl("movzx " + regs[i] + ", " + a.substr(1));
-        else if(a[0] == '/') outtextendl("lea " + regs[i] + ", " + a.substr(1));
-        else mov(regs[i], a);
+        outtextendl("call " + func.substr(0, func.length()-1));
+
+        if(mode64) outtextendl("add rsp, 16");
+        else if(mode32) outtextendl("add esp, 16");
+        else if(mode16 || mode8) outtextendl("add sp, 16");
     }
-    outtextendl("call " + func);
-    
-    if (!mode8) {
-        for (int i = count - 1; i >= 0; i--) if(arg[i][0] != '$') outtextendl("pop " + regs[i]);
+    else{
+
+        if (!mode8) {
+            for (int i = 0; i < count; i++) if(arg[i][0] != '$') outtextendl("push " + regs[i]);
+        }
+
+        for (int i = 0; i < count; i++) {
+            string a = (arg[i][0] == '$') ? arg[i].substr(1) : arg[i];
+            if(a[0] == '|') outtextendl("movzx " + regs[i] + ", " + a.substr(1));
+            else if(a[0] == '/') outtextendl("lea " + regs[i] + ", " + a.substr(1));
+            else mov(regs[i], a);
+        }
+        outtextendl("call " + func);
+        
+        if (!mode8) {
+            for (int i = count - 1; i >= 0; i--) if(arg[i][0] != '$') outtextendl("pop " + regs[i]);
+        }
+
     }
 }
 
@@ -134,6 +147,17 @@ void chkcom() {
             else if (arg[1] == ">")  out << "ja " << arg[3] << endl;
         }
         else if (command[command.length()-1] == ':') outtextendl(command);
+        else if (command == "hsf") {
+            if(mode64) {outtextendl("push rbp");outtextendl("mov rbp, rsp");}
+            else if(mode32) {outtextendl("push ebp");outtextendl("mov ebp, esp");}
+            else if(mode16 || mode8) {outtextendl("push bp");outtextendl("mov bp, sp");}
+        }
+        else if (command == "endsf") {
+            if(mode64) {outtextendl("pop rbp");}
+            else if(mode32) {outtextendl("pop ebp");}
+            else if(mode16 || mode8) {outtextendl("pop bp");}
+            outtextendl("ret");
+        }
         else if (command == "end") outtextendl("ret");
         else if (command == "syscall") {if(arg.size() <= 0) outtextendl("syscall"); else {mov("rax", arg[0]);outtextendl("syscall");}}
         else if (command == "$share") outtextendl("global " + arg[0]);
@@ -157,6 +181,7 @@ void chkcom() {
         else if (command == "in") outtextendl("in " + arg[0] + ", " + arg[1]);
         else if (command == "out") outtextendl("out " + arg[0] + ", " + arg[1]);
         else if (command == "int") outtextendl("int " + arg[0]);
+        else if (command == "rep") outtextendl("rep " + arg[0]);
         else if (command == "repe" || command == "repz") outtextendl("repe " + command2);
         else if (command == "repne" || command == "repnz") outtextendl("repne " + command2);
         else if (command == "lock") outtextendl("lock " + command2);
