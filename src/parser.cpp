@@ -261,7 +261,7 @@ void chkcom() {
             else if(command2 == "bigint") outtextendl(command3 + " resq " + aft);
         }
         
-        else if (aftpos != 0){
+        else if (line.find('=') != string::npos){
             if (line[aftpos-1] == 'r') {for(int i =1;i<aft.length(); i++) {
                 if (aft[i] == '"') continue;
                 outtextendl("mov byte [" + command + "+" + to_string(i-1) + "]" ", '" + aft[i] + "'");
