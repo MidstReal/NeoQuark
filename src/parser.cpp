@@ -223,31 +223,6 @@ void chkcom() {
 
         else if (command2 == "<=>") outtextendl("xchg " + command + ", " + command3);
 
-        else if (aftpos != 0){
-            if (line[aftpos-1] == 'r') {for(int i =1;i<aft.length(); i++) {
-                if (aft[i] == '"') continue;
-                outtextendl("mov byte [" + command + "+" + to_string(i-1) + "]" ", '" + aft[i] + "'");
-            }; outtextendl("mov byte [" + command + "+" + to_string(aft.length()-1) + "]" + ", 0");}
-            else if (line[aftpos+1] == '0') outtextendl("movzx "+ md + command + ", " + command3);
-            
-            else if (line[aftpos-1] == '+') outtextendl("add "+ md + command + ", " + command3);
-            else if (line[aftpos-1] == '-') outtextendl("sub "+ md + command + ", " + command3);
-            else if (line[aftpos-1] == '*' &&  line[aftpos+1] == '|') outtextendl("mul "+ md + command + ", " + command3);
-            else if (line[aftpos-1] == '/' &&  line[aftpos+1] == '|') outtextendl("div "+ md + command);
-            else if (line[aftpos-1] == '*') outtextendl("imul "+ md + command + ", " + command3);
-            else if (line[aftpos-1] == '/') {
-                outtextendl("xor rdx, rdx");
-                outtextendl("idiv "+ md + command3);
-            }
-            else if (line[aftpos-1] == '%') {
-                outtextendl("xor rdx, rdx");
-                outtextendl("idiv "+ md + command3);
-                outtextendl("mov " + command + ", rdx");
-            }
-
-            else mov(md+command, command3);
-        }
-
         else if (command2 == "--") outtextendl("dec " + command);
         else if (command2 == "b--") outtextendl("dec byte " + command);
         else if (command2 == "w--") outtextendl("dec word " + command);
@@ -285,6 +260,32 @@ void chkcom() {
             else if(command2 == "int") outtextendl(command3 + " resd " + aft);
             else if(command2 == "bigint") outtextendl(command3 + " resq " + aft);
         }
+        
+        else if (aftpos != 0){
+            if (line[aftpos-1] == 'r') {for(int i =1;i<aft.length(); i++) {
+                if (aft[i] == '"') continue;
+                outtextendl("mov byte [" + command + "+" + to_string(i-1) + "]" ", '" + aft[i] + "'");
+            }; outtextendl("mov byte [" + command + "+" + to_string(aft.length()-1) + "]" + ", 0");}
+            else if (line[aftpos+1] == '0') outtextendl("movzx "+ md + command + ", " + command3);
+            
+            else if (line[aftpos-1] == '+') outtextendl("add "+ md + command + ", " + command3);
+            else if (line[aftpos-1] == '-') outtextendl("sub "+ md + command + ", " + command3);
+            else if (line[aftpos-1] == '*' &&  line[aftpos+1] == '|') outtextendl("mul "+ md + command + ", " + command3);
+            else if (line[aftpos-1] == '/' &&  line[aftpos+1] == '|') outtextendl("div "+ md + command);
+            else if (line[aftpos-1] == '*') outtextendl("imul "+ md + command + ", " + command3);
+            else if (line[aftpos-1] == '/') {
+                outtextendl("xor rdx, rdx");
+                outtextendl("idiv "+ md + command3);
+            }
+            else if (line[aftpos-1] == '%') {
+                outtextendl("xor rdx, rdx");
+                outtextendl("idiv "+ md + command3);
+                outtextendl("mov " + command + ", rdx");
+            }
+
+            else mov(md+command, command3);
+        }
+
 
         else cmf = true;
     }
