@@ -45,6 +45,7 @@ void chkcom() {
     bool inbkt = false, inqt = false, inasm = false, insqbkt = false;
     int cmdp = 1;
     int curarg = 0;
+    string md = "";
 
     for (int i = 0; i < line.length(); i++) {
         if (line[i] == ';' && !inqt && !insqbkt) break;
@@ -109,6 +110,13 @@ void chkcom() {
 
     if (!asmstr.empty()) outtextendl(asmstr);
     string aft = line.substr(line.find('=') + 1);
+    int aftpos = line.find('=');
+
+    if(line[aftpos + 1] == 'b' || line[aftpos - 1] == 'b') md = "byte ";
+    else if(line[aftpos + 1] == 'w' || line[aftpos - 1] == 'w') md = "word ";
+    else if(line[aftpos + 1] == 'd' || line[aftpos - 1] == 'd') md = "dword ";
+    else if(line[aftpos + 1] == 'q' || line[aftpos - 1] == 'q') md = "qword ";
+
     bool cmf = false;
     if (!command.empty()) {
         if (command == "func") outtextendl(command2 + ":");      
@@ -126,13 +134,13 @@ void chkcom() {
             string type;
 
             if (arg.size() >= 5){
-                if (arg[4] == "1b"){
+                if (arg[4] == "b"){
                     type = "byte ";
-                } else if(arg[4] == "2b"){
+                } else if(arg[4] == "w"){
                     type = "word ";
-                } else if(arg[4] == "4b"){
+                } else if(arg[4] == "d"){
                     type = "dword ";
-                } else if(arg[4] == "8b"){
+                } else if(arg[4] == "q"){
                     type = "qword ";
                 }
             }
@@ -202,29 +210,42 @@ void chkcom() {
         else if (command == "align") outtextendl("align " + arg[0]);
         else if (command == "lea") outtextendl("lea " + arg[0] + ", " + arg[1]);
 
-        else if (command2 == "str=") {for(int i =1;i<aft.length(); i++) {
-            if (aft[i] == '"') continue;
-            outtextendl("mov byte [" + command + "+" + to_string(i-1) + "]" ", '" + aft[i] + "'");
-        }; outtextendl("mov byte [" + command + "+" + to_string(aft.length()-1) + "]" + ", 0");}
-        else if (command2 == "=0") outtextendl("movzx " + command + ", " + command3);
-        else if (command2 == "=") mov(command, command3);
-        else if (command2 == "b=") mov("byte "+command, command3);
-        else if (command2 == "w=") mov("word "+command, command3);
-        else if (command2 == "d=") mov("dword "+command, command3);
-        else if (command2 == "q=") mov("qword "+command, command3);
-        else if (command2 == "+=") outtextendl("add " + command + ", " + command3);
-        else if (command2 == "-=") outtextendl("sub " + command + ", " + command3);
-        else if (command2 == "*=|") outtextendl("mul " + command + ", " + command3);
-        else if (command2 == "/=|") outtextendl("div " + command);
-        else if (command2 == "*=") outtextendl("imul " + command + ", " + command3);
-        else if (command2 == "/=") {
-            outtextendl("xor rdx, rdx");
-            outtextendl("idiv " + command3);
-        }
-        else if (command2 == "%=") {
-            outtextendl("xor rdx, rdx");
-            outtextendl("idiv " + command3);
-            outtextendl("mov " + command + ", rdx");
+        else if (command2 == "&=")  outtextendl("and " + command + ", " + command3);
+        else if (command2 == "|=")  outtextendl("or " + command + ", " + command3);
+        else if (command2 == "^=")  outtextendl("xor " + command + ", " + command3);
+        else if (command2 == "~")   outtextendl("not " + command);
+
+        else if (command == "<1=" || command == "<b=") outtextendl("db " + line.substr(3, line.length()-3));
+        else if (command == "<2=" || command == "<w=") outtextendl("dw " + line.substr(3, line.length()-3));
+        else if (command == "<4=" || command == "<d=") outtextendl("dd " + line.substr(3, line.length()-3));
+        else if (command == "<8=" || command == "<q=") outtextendl("dq " + line.substr(3, line.length()-3));
+        else if (command == "<c=") outtextendl("equ " + line.substr(3, line.length()-3));
+
+        else if (command2 == "<=>") outtextendl("xchg " + command + ", " + command3);
+
+        else if (aftpos != 0){
+            if (line[aftpos-1] == 'r') {for(int i =1;i<aft.length(); i++) {
+                if (aft[i] == '"') continue;
+                outtextendl("mov byte [" + command + "+" + to_string(i-1) + "]" ", '" + aft[i] + "'");
+            }; outtextendl("mov byte [" + command + "+" + to_string(aft.length()-1) + "]" + ", 0");}
+            else if (line[aftpos+1] == '0') outtextendl("movzx "+ md + command + ", " + command3);
+            
+            else if (line[aftpos-1] == '+') outtextendl("add "+ md + command + ", " + command3);
+            else if (line[aftpos-1] == '-') outtextendl("sub "+ md + command + ", " + command3);
+            else if (line[aftpos-1] == '*' &&  line[aftpos+1] == '|') outtextendl("mul "+ md + command + ", " + command3);
+            else if (line[aftpos-1] == '/' &&  line[aftpos+1] == '|') outtextendl("div "+ md + command);
+            else if (line[aftpos-1] == '*') outtextendl("imul "+ md + command + ", " + command3);
+            else if (line[aftpos-1] == '/') {
+                outtextendl("xor rdx, rdx");
+                outtextendl("idiv "+ md + command3);
+            }
+            else if (line[aftpos-1] == '%') {
+                outtextendl("xor rdx, rdx");
+                outtextendl("idiv "+ md + command3);
+                outtextendl("mov " + command + ", rdx");
+            }
+
+            else mov(md+command, command3);
         }
 
         else if (command2 == "--") outtextendl("dec " + command);
@@ -239,11 +260,6 @@ void chkcom() {
         else if (command2 == "d++") outtextendl("inc dword " + command);
         else if (command2 == "q++") outtextendl("inc qword " + command);
 
-        else if (command2 == "&=")  outtextendl("and " + command + ", " + command3);
-        else if (command2 == "|=")  outtextendl("or " + command + ", " + command3);
-        else if (command2 == "^=")  outtextendl("xor " + command + ", " + command3);
-        else if (command2 == "~")   outtextendl("not " + command);
-
         else if (command2 == "<<")  outtextendl("shl " + command + ", " + command3);
         else if (command2 == ">>")  outtextendl("shr " + command + ", " + command3);
         else if (command2 == "sar") outtextendl("sar " + command + ", " + command3);
@@ -256,8 +272,6 @@ void chkcom() {
         else if (command == "->") outtextendl("pop " + command2);
         else if (command == "<-<") outtextendl("pusha");
         else if (command == ">->") outtextendl("popa");
-
-        else if (command2 == "<=>") outtextendl("xchg " + command + ", " + command3);
 
         else if (command == "byte" || command == "char") outtextendl(command2 + " db " + aft);
         else if (command == "short")  outtextendl(command2 + " dw " + aft);
@@ -272,12 +286,6 @@ void chkcom() {
             else if(command2 == "bigint") outtextendl(command3 + " resq " + aft);
         }
 
-
-        else if (command == "<1=" || command == "<b=") outtextendl("db " + line.substr(3, line.length()-3));
-        else if (command == "<2=" || command == "<w=") outtextendl("dw " + line.substr(3, line.length()-3));
-        else if (command == "<4=" || command == "<d=") outtextendl("dd " + line.substr(3, line.length()-3));
-        else if (command == "<8=" || command == "<q=") outtextendl("dq " + line.substr(3, line.length()-3));
-        else if (command == "<c=") outtextendl("equ " + line.substr(3, line.length()-3));
         else cmf = true;
     }
 
