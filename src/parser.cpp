@@ -262,10 +262,10 @@ void chkcom() {
         }
         
         else if (line.find('=') != string::npos){
-            if (line[aftpos-1] == 'r') {for(int i =1;i<aft.length(); i++) {
+            if (line[aftpos-1] == 'r') {for(int i = 1;i<aft.length(); i++) {
                 if (aft[i] == '"') continue;
-                outtextendl("mov byte [" + command + "+" + to_string(i-1) + "]" ", '" + aft[i] + "'");
-            }; outtextendl("mov byte [" + command + "+" + to_string(aft.length()-1) + "]" + ", 0");}
+                outtextendl("mov byte [" + command + "+" + to_string(i-2) + "]" ", '" + aft[i] + "'");
+            }; outtextendl("mov byte [" + command + "+" + to_string(aft.length()-2) + "]" + ", 0");}
             else if (line[aftpos+1] == '0') outtextendl("movzx "+ md + command + ", " + command3);
             
             else if (line[aftpos-1] == '+') outtextendl("add "+ md + command + ", " + command3);
