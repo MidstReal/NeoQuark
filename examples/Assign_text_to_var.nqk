@@ -1,0 +1,25 @@
+; compile:
+; ./nquark test/main.nqk -o test/temp.asm -64
+; nasm -f elf64 test/temp.asm -o test/prog.o
+
+; code for version 26-7
+
+$share(_start)
+$include("libs/linux.asm")
+
+$section(.text)
+
+func _start
+
+    ; mov [msg+0], 'B'
+    ; mov [msg+1], 'y'
+    ; mov [msg+2], 'e'
+    ; ...
+    msg r= "Bye, Linux!  "
+
+    print(msg, 23)
+    exit
+
+$section(.data)
+
+char msg = "Hello, Linux!",10
