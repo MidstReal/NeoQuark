@@ -6,13 +6,16 @@ using namespace std;
 
 void funcCall(const string* regs, int count, const vector<string>& arg, const string& func) {
     if (line[line.find('(') - 1] == '&') {
-        for(int i = 0; i<arg.size();i++) outtextendl("push " + arg[i]);
+        for(int i = 0; i < arg.size(); i++) outtextendl("push " + arg[i]);
 
-        outtextendl("call " + func.substr(0, func.length()-1));
+        outtextendl("call " + func.substr(0, func.length() - 1));
 
-        if(mode64) outtextendl("add rsp, 16");
-        else if(mode32) outtextendl("add esp, 16");
-        else if(mode16 || mode8) outtextendl("add sp, 16");
+        int wordSize = mode64 ? 8 : (mode32 ? 4 : 2);
+        string offset = to_string(arg.size() * wordSize);
+
+        if(mode64) outtextendl("add rsp, " + offset);
+        else if(mode32) outtextendl("add esp, " + offset);
+        else if(mode16 || mode8) outtextendl("add sp, " + offset);
     }
     else{
 
