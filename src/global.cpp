@@ -10,3 +10,4 @@ bool mode64 = false;
 bool mode32 = false;
 bool mode16 = false;
 bool mode8 = false;
+bool dbg = false;

@@ -42,6 +42,7 @@ void chkcom() {
     size_t first = line.find_first_not_of(" \t");
     if (first == string::npos) return;
     line = line.substr(first);
+    if(line.find(';') == string::npos && dbg) {outtextendl("");outtextendl("");outtextendl(";-------" + line + "-------");}
 
     string command = "", command2 = "", command3 = "", command4 = "", func = "", asmstr = "";
     vector<string> arg;
@@ -49,6 +50,7 @@ void chkcom() {
     int cmdp = 1;
     int curarg = 0;
     string md = "";
+
 
     for (int i = 0; i < line.length(); i++) {
         if (line[i] == ';' && !inqt && !insqbkt) break;
@@ -307,4 +309,5 @@ void chkcom() {
         else if(mode8) funcCall(regs8, count, arg, func);
     }
 
+    if(line.find(';') == string::npos && dbg){outtextendl(";----------------------------");}
 }

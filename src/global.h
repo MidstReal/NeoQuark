@@ -16,5 +16,6 @@ extern bool mode64;
 extern bool mode32;
 extern bool mode16;
 extern bool mode8;
+extern bool dbg;
 
 #endif

@@ -21,6 +21,9 @@ int main(int argc, char* argv[]){
     else if (argc >= 5 && string(argv[4]) == "-8"){mode8 = true;}
     else {mode64 = true;}
 
+    if (argc >= 6 && string(argv[5]) == "-dbg"){dbg = true;}
+    else dbg = false;
+
     in.open(inputFile);
     out.open(outputFile);
 
