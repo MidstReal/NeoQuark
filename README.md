@@ -19,3 +19,11 @@ program bin for own 16-bit os:
 ./nquark input.nqk -o output.asm -16
 nasm -f bin output.asm -o file.bin
 ```
+
+
+parse with comments:
+```
+[compile command] -dbg
+
+./nquark input.nqk -o output.asm -64 -dbg
+```
