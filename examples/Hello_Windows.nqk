@@ -5,24 +5,13 @@
 
 ; code for version 26-7
 
-
 $share(_start)
 
-$use(WriteFile)
-$use(GetStdHandle)
+$include("libs/win64.asm")
 
 $section(.text)
 func _start
-	rsp -= 40
-	rcx = -11
-	GetStdHandle
-	rcx = rax
-	rdx = msg
-	r8d = 25
-	r9 ^= r9
-	[rsp+32] q= 0
-	WriteFile
-	rsp += 40
+	print&(msg, 25)
 end
 
 $section(.data)
