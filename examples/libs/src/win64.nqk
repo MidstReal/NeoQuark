@@ -1,0 +1,18 @@
+$share(print)
+
+$use(WriteFile)
+$use(GetStdHandle)
+
+func print
+hsf
+	rsp -= 40
+	rcx = -11
+	GetStdHandle
+	rcx = rax
+	rdx = [rbp+24]
+	r8d = [rbp+16]
+	r9 ^= r9
+	[rsp+32] q= 0
+	WriteFile
+	rsp += 40
+endsf
