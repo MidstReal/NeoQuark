@@ -18,7 +18,7 @@ func _start
 	GetStdHandle
 	rcx = rax
 	rdx = msg
-	r8d = 18
+	r8d = 25
 	r9 ^= r9
 	[rsp+32] q= 0
 	WriteFile
