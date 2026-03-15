@@ -1,0 +1,29 @@
+; compile:
+; nquark.exe input.nqk -o output.asm -64
+; nasm.exe -f win64 output.asm -o prog.obj
+; golink.exe prog.obj kernel32.dll /console /entry:_start
+
+; code for version 26-7
+
+
+$share(_start)
+
+$use(WriteFile)
+$use(GetStdHandle)
+
+$section(.text)
+func _start
+	rsp -= 40
+	rcx = -11
+	GetStdHandle
+	rcx = rax
+	rdx = msg
+	r8d = 18
+	r9 ^= r9
+	[rsp+32] q= 0
+	WriteFile
+	rsp += 40
+end
+
+$section(.data)
+char msg = "Hello, Windows!",10
