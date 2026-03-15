@@ -14,6 +14,18 @@ ld prog.o -o prog
 
 ./prog
 ```
+programm for windows:
+```
+nquark.exe input.nqk -o output.asm -64
+
+nasm.exe -f win64 output.asm -o prog.obj
+golink.exe prog.obj kernel32.dll /console /entry:_start
+
+prog.exe
+```
+nasm:   https://www.nasm.us/pub/nasm/releasebuilds/
+golink: http://www.godevtool.com/Golink.zip
+
 program bin for own 16-bit os:
 ```
 ./nquark input.nqk -o output.asm -16
