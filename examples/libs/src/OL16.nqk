@@ -3,33 +3,104 @@ $share(printstr)
 $share(readch)
 $share(cls)
 $share(exit)
+$share(set_320x200)
+$share(set_80x25)
+$share(put_pixel)
 
-func printch()
+func printch
     ah = 0x0e
     int(0x10)
 end
 
-func printstr()
-    `lodsb`
-    if(al, ==, 0, .done)
-    ah = 0x0e
-    int(0x10)
-    goto(printstr)
-func .done
-end
+func printstr
+hsf
+    si = [bp+4]
 
-func cls()
+    func .loop
+        `lodsb`
+        if(al, ==, 0, .done)
+        ah = 0x0e
+        int(0x10)
+        goto(.loop)
+
+    func .done
+endsf
+
+func cls
     ax = 0x0003
     int(0x10)
 end
 
-func readch()
+func readch
     ah = 0x00
     int(0x16)
 end
 
-func exit()
+func set_320x200
+    ax = 0x0013
+    int(0x10)
+end
+
+func set_80x25
+    ax = 0x0003
+    int(0x10)
+end
+
+func put_pixel
+hsf
+    <- ax
+    <- cx
+    <- dx
+    <- di
+    <- es
+
+    cx = [bp+8]
+    dx = [bp+6]
+    ax = [bp+4]
+
+    <- ax
+    ax = 0xa000
+    es = ax
+    -> ax
+
+    <- ax
+    ax = dx
+    dx = 320
+    dx *=|
+    ax += cx
+    di = ax
+    -> ax
+
+    `stosb`
+
+    -> es
+    -> di
+    -> dx
+    -> cx
+    -> ax
+endsf
+
+
+func exit
     goto($)
 end
 
-`buffer  times 64 db 0`
+const BLACK        = 0x00
+const BLUE         = 0x01
+const GREEN        = 0x02
+const CYAN         = 0x03
+const RED          = 0x04
+const MAGENTA      = 0x05
+const BROWN        = 0x06
+const LIGHT_GRAY   = 0x07
+const DARK_GRAY    = 0x08
+const LIGHT_BLUE   = 0x09
+const LIGHT_GREEN  = 0x0A
+const LIGHT_CYAN   = 0x0B
+const LIGHT_RED    = 0x0C
+const LIGHT_MAGENTA = 0x0D
+const YELLOW       = 0x0E
+const WHITE        = 0x0F
+
+buffer:
+    reserve(64, 0)
