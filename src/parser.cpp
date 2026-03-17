@@ -249,7 +249,17 @@ void chkcom() {
         else if (command2 == "??")  outtextendl("test " + command + ", " + command3);
 
         else if (command == "<-") outtextendl("push " + command2);
+        else if (command == "<-b") outtextendl("push byte " + command2);
+        else if (command == "<-w") outtextendl("push word " + command2);
+        else if (command == "<-d") outtextendl("push dword " + command2);
+        else if (command == "<-q") outtextendl("push qword " + command2);
+
         else if (command == "->") outtextendl("pop " + command2);
+        else if (command == "b->") outtextendl("pop byte " + command2);
+        else if (command == "w->") outtextendl("pop word " + command2);
+        else if (command == "d->") outtextendl("pop dword " + command2);
+        else if (command == "q->") outtextendl("pop qword " + command2);
+
         else if (command == "<-<") outtextendl("pusha");
         else if (command == ">->") outtextendl("popa");
 
