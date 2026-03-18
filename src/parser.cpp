@@ -6,7 +6,19 @@ using namespace std;
 
 void funcCall(const string* regs, int count, const vector<string>& arg, const string& func) {
     if (line[line.find('(') - 1] == '&') {
-        for(int i = 0; i < arg.size(); i++) outtextendl("push " + arg[i]);
+        for(int i = 0; i < arg.size(); i++) {
+            string a = arg[i];
+            string type = "";
+
+            if (a.length() > 2 && a[1] == ':') {
+                if      (a[0] == 'b') { type = "byte ";  a = a.substr(2); }
+                else if (a[0] == 'w') { type = "word ";  a = a.substr(2); }
+                else if (a[0] == 'd') { type = "dword "; a = a.substr(2); }
+                else if (a[0] == 'q') { type = "qword "; a = a.substr(2); }
+            }
+
+            outtextendl("push " + type + a);
+        }
 
         outtextendl("call " + func.substr(0, func.length() - 1));
 
@@ -25,9 +37,20 @@ void funcCall(const string* regs, int count, const vector<string>& arg, const st
 
         for (int i = 0; i < count; i++) {
             string a = (arg[i][0] == '$') ? arg[i].substr(1) : arg[i];
-            if(a[0] == '|') outtextendl("movzx " + regs[i] + ", " + a.substr(1));
-            else if(a[0] == '/') outtextendl("lea " + regs[i] + ", " + a.substr(1));
-            else mov(regs[i], a);
+            string type = "";
+            if (a.length() > 2 && a[1] == ':') {
+                if      (a[0] == 'b') { type = "byte ";  a = a.substr(2); }
+                else if (a[0] == 'w') { type = "word ";  a = a.substr(2); }
+                else if (a[0] == 'd') { type = "dword "; a = a.substr(2); }
+                else if (a[0] == 'q') { type = "qword "; a = a.substr(2); }
+            }
+
+            if(a[0] == '|') outtextendl("movzx " + regs[i] + ", " + type + a.substr(1));
+            else if(a[0] == '/') outtextendl("lea " + regs[i] + ", " + type + a.substr(1));
+            else{
+                if (type != "") outtextendl("mov " + regs[i] + ", " + type + a);
+                else mov(regs[i], a);
+            }
         }
         outtextendl("call " + func);
         
